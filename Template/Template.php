@@ -287,6 +287,15 @@ class Template extends Renderer
     }
 
     /**
+     * Returns the active project
+     *
+     * @return \Fewlines\Core\Application\ProjectManager\Project
+     */
+    public function getProject() {
+        return ProjectManager::getActiveProject();
+    }
+
+    /**
      * Translates a path to a translation
      * string
      *
