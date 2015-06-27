@@ -382,14 +382,20 @@ class Template extends Renderer
     public function __call($name, $args) {
         if (preg_match($this->viewHelperExp, $name)) {
             $helperName = preg_replace($this->viewHelperExp, '', $name);
-            $defaultNs = ProjectManager::getDefaultProject()->getNsName() . VIEW_HELPER_RL_NS;
+
+            $defaultNs = ProjectManager::getActiveProject()->getNsName() . VIEW_HELPER_RL_NS;
             $helperClass = $defaultNs . '\\' . $helperName;
 
             if ( ! class_exists($helperClass)) {
-                throw new Exception\HelperNotFoundException(
-                    'View helper "' . $helperClass . '" was
-                    not found!'
-                );
+                $defaultNs = ProjectManager::getDefaultProject()->getNsName() . VIEW_HELPER_RL_NS;
+                $helperClass = $defaultNs . '\\' . $helperName;
+
+                if ( ! class_exists($helperClass)) {
+                    throw new Exception\HelperNotFoundException(
+                        'View helper "' . $helperClass . '" was
+                        not found!'
+                    );
+                }
             }
 
             $helper = $this->getHelperClass($helperClass);
