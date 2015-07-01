@@ -4,12 +4,12 @@ namespace Fewlines\Core\Dom;
 class Dom
 {
     /**
-     * @var null|\Fewlines\Dom\Dom
+     * @var null|self
      */
     private static $instance;
 
     /**
-     * @return \Fewlines\Core\Dom\Dom
+     * @return self
      */
     public static function getInstance() {
         if (self::$instance instanceof \Fewlines\Core\Dom\Dom) {
@@ -37,6 +37,21 @@ class Dom
             case Element::DIV_TAG:
                 $element->setDomTag(Element::DIV_TAG);
                 $element->setDomStr(Element::DIV_STR);
+                break;
+
+            case Element::A_TAG:
+                $element->setDomTag(Element::A_TAG);
+                $element->setDomStr(Element::A_STR);
+                break;
+
+            case Element::UL_TAG:
+                $element->setDomTag(Element::UL_TAG);
+                $element->setDomStr(Element::UL_STR);
+                break;
+
+            case Element::LI_TAG:
+                $element->setDomTag(Element::LI_TAG);
+                $element->setDomStr(Element::LI_STR);
                 break;
 
             case Element::SPAN_TAG:

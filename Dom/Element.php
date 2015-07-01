@@ -16,6 +16,36 @@ class Element extends Element\Renderer
     /**
      * @var string
      */
+    const UL_TAG = 'ul';
+
+    /**
+     * @var string
+     */
+    const UL_STR = '<ul %s>%s</ul>';
+
+    /**
+     * @var string
+     */
+    const LI_TAG = 'li';
+
+    /**
+     * @var string
+     */
+    const LI_STR = '<li %s>%s</li>';
+
+    /**
+     * @var string
+     */
+    const A_TAG = 'a';
+
+    /**
+     * @var string
+     */
+    const A_STR = '<a %s>%s</a>';
+
+    /**
+     * @var string
+     */
     const INPUT_TAG = 'input';
 
     /**
@@ -166,6 +196,16 @@ class Element extends Element\Renderer
         }
 
         $this->attributes = $attributes;
+    }
+
+    /**
+     * Add a attribute to the collection
+     *
+     * @param string $name
+     * @param string $value
+     */
+    public function addAttribute($name, $value) {
+        $this->attributes[$name] = $value;
     }
 
     /**
