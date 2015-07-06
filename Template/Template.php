@@ -334,6 +334,16 @@ class Template extends Renderer
         return Registry::get('environment');
     }
 
+    /**
+     * Gets a value from the registry
+     *
+     * @param  string $name
+     * @return mixed
+     */
+    public function getFromRegistry($name) {
+        return Registry::get($name);
+    }
+
 
     ###########################
     ##### MAGIC FUNCTIONS #####
