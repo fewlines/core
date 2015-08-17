@@ -24,8 +24,10 @@ class UrlHelper extends \Fewlines\Core\Helper\View\BaseUrl
                  */
 
                 $tmpParts = array();
+                $urlParts = Router::getInstance()->getRouteUrlParts();
+                $counter = 0;
 
-                foreach (Router::getInstance()->getRouteUrlParts() as $part => $value) {
+                foreach ($urlParts as $part => $value) {
                     if (is_array($value)) {
                         continue;
                     }
@@ -33,9 +35,18 @@ class UrlHelper extends \Fewlines\Core\Helper\View\BaseUrl
                     if (array_key_exists($part, $parts)) {
                         $tmpParts[] = $parts[$part];
                     }
-                    else {
+                    else if ($counter != count($urlParts)-1) {
+                        /**
+                         * If it's not the last DEFAULT value
+                         * it will be added to the list otherwise
+                         * it will be ignored, because the router
+                         * takes the default value automatically
+                         */
+
                         $tmpParts[] = $value;
                     }
+
+                    $counter++;
                 }
 
                 $parts = $tmpParts;

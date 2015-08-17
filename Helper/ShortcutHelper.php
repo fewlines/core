@@ -13,7 +13,7 @@ class ShortcutHelper
 	/**
 	 * @var string
 	 */
-	const SHORTUCT_ARRAY_SYNTAX = '/(.*)\:(.*),/';
+	const SHORTUCT_ARRAY_SYNTAX = '/(.*)\:(.*)/';
 
 	/**
 	 * @var string
