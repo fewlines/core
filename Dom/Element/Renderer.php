@@ -10,8 +10,7 @@ abstract class Renderer
 	 * @param  string $content
 	 * @return string
 	 */
-	protected function renderStr($parseStr, $attributeStr, $content)
-	{
+	protected function renderStr($parseStr, $attributeStr, $content) {
 		return sprintf($parseStr, $attributeStr, $content);
 	}
 }
