@@ -66,4 +66,13 @@ class ArrayHelper
 
         return $array;
     }
+
+    /**
+     * @param  string $seperator
+     * @param  string $str
+     * @return array
+     */
+    public static function trimExplode($seperator, $str) {
+        return self::trimValues(explode($seperator, $str));
+    }
 }

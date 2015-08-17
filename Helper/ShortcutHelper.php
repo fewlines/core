@@ -13,6 +13,11 @@ class ShortcutHelper
 	/**
 	 * @var string
 	 */
+	const SHORTUCT_ARRAY_SYNTAX = '/(.*)\:(.*),/';
+
+	/**
+	 * @var string
+	 */
 	const SHORTCUT_FUNCTION_PREFIX = 'exec';
 
 	/**
@@ -43,8 +48,8 @@ class ShortcutHelper
 		// Execute shortcuts and build result string
 		for ($i = 0, $len = count($shortcuts); $i < $len; $i++) {
 			if (self::isShortcut($shortcuts[$i])) {
-				$name = strtolower(self::getStringVars($shortcuts[$i], 1));
-				$value = self::getStringVars($shortcuts[$i], 2);
+				$name = strtolower(self::getStringArguments($shortcuts[$i], 1));
+				$value = self::getStringArguments($shortcuts[$i], 2);
 				$result .= self::executeShortcut($name, $value);
 			}
 			else {
@@ -81,16 +86,43 @@ class ShortcutHelper
 	 *
 	 * @param  string $str
 	 * @param  integer $index
-	 * @return string
+	 * @return string|array
 	 */
-	private static function getStringVars($str, $index) {
+	private static function getStringArguments($str, $index) {
 		preg_match(self::SHORTCUT_IDENTIFIER_PATTERN, $str, $matches);
 
 		$value = '';
 		$index += 1; // Increase to avoid selecting the full $str
 
 		if (array_key_exists($index, $matches)) {
-			$value = $matches[$index];
+			$value = trim($matches[$index]);
+		}
+
+		/**
+		 * Check if the value
+		 * is an array or not
+		 */
+
+		if (preg_match(self::SHORTUCT_ARRAY_SYNTAX, $value)) {
+			/**
+			 * Get the values of the array
+			 * sperated from the string
+			 */
+
+			$arrayValues = ArrayHelper::trimExplode(',', $value);
+
+			/**
+			 * Build associative array
+			 * from the given values
+			 */
+
+			$value = array();
+
+			foreach ($arrayValues as $val) {
+				$expVal = ArrayHelper::trimExplode(':', $val);
+				$value[$expVal[0]] = $expVal[1];
+ 			}
+
 		}
 
 		return $value;
