@@ -138,10 +138,6 @@ class View
         $layout = Template::getInstance()->getLayout()->getName();
         $viewFile = PathHelper::getRealViewPath($view, $this->getAction(), $layout);
 
-        if ( ! file_exists($viewFile)) {
-            HttpHeader::set(404);
-        }
-
         $this->path = $viewFile;
     }
 
@@ -342,9 +338,14 @@ class View
      */
     private function callViewAction($method) {
         if (false == method_exists($this->viewController, $method)) {
-            throw new View\Exception\ActionNotFoundException('Could not found the action (method) "' . $method . '"
-                - Check the controller "' . $this->controllerClass . '"
-                for it');
+            if (Registry::get('environment')->isLocal()) {
+                throw new View\Exception\ActionNotFoundException('Could not found the action (method) "' . $method . '"
+                    - Check the controller "' . $this->controllerClass . '"
+                    for it');
+            }
+            else {
+                HttpHeader::set(404);
+            }
         }
 
         return $this->viewController->{$method}();
@@ -360,9 +361,14 @@ class View
      */
     private function callRouteMethod($method) {
         if (false == method_exists($this->routeController, $method)) {
-            throw new View\Exception\MethodNotFoundException('Could not found the method "' . $method . '"
-                - Check the controller "' . $this->controllerClass . '"
-                for it');
+            if (Registry::get('environment')->isLocal()) {
+                throw new View\Exception\MethodNotFoundException('Could not found the method "' . $method . '"
+                    - Check the controller "' . $this->controllerClass . '"
+                    for it');
+            }
+            else {
+                HttpHeader::set(404);
+            }
         }
 
         return $this->routeController->{$method}();

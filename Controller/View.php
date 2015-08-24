@@ -63,6 +63,10 @@ class View implements IView
 		$this->template = $template;
 		$this->httpRequest = Router::getInstance()->getRequest();
 		$this->httpResponse = $this->httpRequest->getResponse();
+
+		if (method_exists($this, 'postInit')) {
+			call_user_func(array($this, 'postInit'));
+		}
 	}
 
 	/**

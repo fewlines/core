@@ -133,6 +133,10 @@ class Renderer
                     echo $this->controller;
                 }
                 else {
+                    if ( ! file_exists($file)) {
+                        HttpHeader::set(404);
+                    }
+
                     // Output rendered html (view)
                     echo $this->getRenderedHtml($file);
                 }
@@ -151,6 +155,9 @@ class Renderer
 
             if (file_exists($file)) {
                 $file = $this->getRenderedHtml($file);
+            }
+            else {
+                HttpHeader::set(404);
             }
 
             return $file;
