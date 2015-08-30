@@ -392,6 +392,7 @@ class Template extends Renderer
     public function __call($name, $args) {
         if (preg_match($this->viewHelperExp, $name)) {
             $helperName = preg_replace($this->viewHelperExp, '', $name);
+            $helperName = ucfirst($helperName);
 
             $defaultNs = ProjectManager::getActiveProject()->getNsName() . VIEW_HELPER_RL_NS;
             $helperClass = $defaultNs . '\\' . $helperName;
