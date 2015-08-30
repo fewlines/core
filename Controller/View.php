@@ -4,6 +4,9 @@ namespace Fewlines\Core\Controller;
 use Fewlines\Core\Helper\UrlHelper;
 use Fewlines\Core\Application\Config;
 use Fewlines\Core\Http\Request as HttpRequest;
+use Fewlines\Core\Application\ProjectManager;
+use Fewlines\Core\Application\Registry;
+use Fewlines\Core\Locale\Locale;
 use Fewlines\Core\Http\Router;
 
 class View implements IView
@@ -17,6 +20,16 @@ class View implements IView
 	protected $template;
 
 	/**
+	 * @var \Fewlines\Core\Template\View
+	 */
+	protected $view;
+
+	/**
+	 * @var \Fewlines\Core\Template\Layout
+	 */
+	protected $layout;
+
+	/**
 	 * @var \Fewlines\Core\Http\Request
 	 */
 	protected $httpRequest;
@@ -25,34 +38,6 @@ class View implements IView
 	 * @var \Fewlines\Core\Http\Response
 	 */
 	protected $httpResponse;
-
-	/**
-	 * @var array
-	 */
-	private $usedAssignNames = array();
-
-	/**
-	 * Assigns a var to
-	 * the active template
-	 *
-	 * @param  string $name
-	 * @param  *	  $content
-	 * @return *
-	 */
-	protected function assign($name, $content) {
-		if (true == property_exists($this->template, $name)) {
-			if(false == in_array($name, $this->usedAssignNames)) {
-				throw new Exception\PropertyExistException("Could not assign the variable
-					\"" . $name . "\". The property
-					already exists.");
-			}
-		}
-
-		$this->template->$name = $content;
-		$this->usedAssignNames[] = $name;
-
-		return $content;
-	}
 
 	/**
 	 * Inits with the template
@@ -64,18 +49,12 @@ class View implements IView
 		$this->httpRequest = Router::getInstance()->getRequest();
 		$this->httpResponse = $this->httpRequest->getResponse();
 
+		$this->view = $this->template->getView();
+		$this->layout = $this->template->getLayout();
+
 		if (method_exists($this, 'postInit')) {
 			call_user_func(array($this, 'postInit'));
 		}
-	}
-
-	/**
-	 * Get the instantiated config instance
-	 *
-	 * @return \Fewlines\Core\Application\Config
-	 */
-	protected function getConfig() {
-		return Config::getInstance();
 	}
 
 	/**
@@ -83,7 +62,7 @@ class View implements IView
 	 *
 	 * @param string $url
 	 */
-	protected function redirect($url) {
+	public function redirect($url) {
 		HttpHeader::redirect($url);
 	}
 
@@ -93,7 +72,7 @@ class View implements IView
 	 * @param  string|array $parts
 	 * @return string
 	 */
-	protected function getBaseUrl($parts = "") {
+	public function getBaseUrl($parts = "") {
 		return UrlHelper::getBaseUrl($parts);
 	}
 
@@ -101,7 +80,65 @@ class View implements IView
 	 * @param  string $view
 	 * @return string
 	 */
-	protected function render($view) {
+	public function render($view) {
 		return $this->template->renderView($view);
 	}
+
+	/**
+     * Returns the active project
+     *
+     * @return \Fewlines\Core\Application\ProjectManager\Project
+     */
+    public function getProject() {
+        return ProjectManager::getActiveProject();
+    }
+
+    /**
+     * Translates a path to a translation
+     * string
+     *
+     * @param  string $path
+     * @return string
+     */
+    public function translate($path) {
+        return Locale::get($path);
+    }
+
+    /**
+     * Gets a config element by a given
+     * path
+     *
+     * @param  string $path
+     * @return \Fewlines\Core\Xml\Element|false
+     */
+    public function getConfig($path) {
+        return Config::getInstance()->getElementByPath($path);
+    }
+
+    /**
+     * Gets config elements from a element
+     *
+     * @param  string $path
+     * @return array
+     */
+    public function getConfigs($path) {
+        return Config::getInstance()->getElementsByPath($path);
+    }
+
+    /**
+     * @return \Fewlines\Core\Application\Environment
+     */
+    public function getEnvironment() {
+        return Registry::get('environment');
+    }
+
+    /**
+     * Gets a value from the registry
+     *
+     * @param  string $name
+     * @return mixed
+     */
+    public function getFromRegistry($name) {
+        return Registry::get($name);
+    }
 }

@@ -57,7 +57,7 @@ class Template extends Renderer
      *
      * @var string
      */
-    public $viewHelperExp = '/helper|Helper/';
+    private $viewHelperExp = '/helper|Helper/';
 
     /**
      * The arguments of the template parsed
@@ -65,7 +65,7 @@ class Template extends Renderer
      *
      * @var array
      */
-    public $arguments = array();
+    private $arguments = array();
 
     /**
      * Holds the current instance of the
@@ -286,64 +286,6 @@ class Template extends Renderer
         return $this->view;
     }
 
-    /**
-     * Returns the active project
-     *
-     * @return \Fewlines\Core\Application\ProjectManager\Project
-     */
-    public function getProject() {
-        return ProjectManager::getActiveProject();
-    }
-
-    /**
-     * Translates a path to a translation
-     * string
-     *
-     * @param  string $path
-     * @return string
-     */
-    protected function translate($path) {
-        return Locale::get($path);
-    }
-
-    /**
-     * Gets a config element by a given
-     * path
-     *
-     * @param  string $path
-     * @return \Fewlines\Core\Xml\Element|false
-     */
-    protected function getConfig($path) {
-        return Config::getInstance()->getElementByPath($path);
-    }
-
-    /**
-     * Gets config elements from a element
-     *
-     * @param  string $path
-     * @return array
-     */
-    protected function getConfigs($path) {
-        return Config::getInstance()->getElementsByPath($path);
-    }
-
-    /**
-     * @return \Fewlines\Core\Application\Environment
-     */
-    public function getEnvironment() {
-        return Registry::get('environment');
-    }
-
-    /**
-     * Gets a value from the registry
-     *
-     * @param  string $name
-     * @return mixed
-     */
-    public function getFromRegistry($name) {
-        return Registry::get($name);
-    }
-
 
     ###########################
     ##### MAGIC FUNCTIONS #####
@@ -367,18 +309,7 @@ class Template extends Renderer
      * @return *
      */
     public function __get($name) {
-        $controller = $this->view->getViewController();
-
-        if ( ! is_null($controller) && property_exists($controller, $name)) {
-            return $controller->{$name};
-        }
-        else if ( ! property_exists($this, $name)) {
-            throw new Exception\PropertyNotFoundException(
-                'Could not receive the property "' . $name . '".
-				It does not exist.');
-        }
-
-        return $this->$name;
+        return $this->view->getVar($name);
     }
 
     /**

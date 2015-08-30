@@ -95,7 +95,7 @@ class Renderer
         // Set layout
         $layout = $template->getLayout();
 
-        if ($this->layout->isDisabled()) {
+        if ($layout->isDisabled()) {
             if (is_string($this->controller)) {
                 echo $this->controller;
             }

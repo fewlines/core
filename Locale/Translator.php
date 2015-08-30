@@ -4,6 +4,7 @@ namespace Fewlines\Core\Locale;
 use Fewlines\Core\Csv\Csv;
 use Fewlines\Core\Helper\PathHelper;
 use Fewlines\Core\Helper\ArrayHelper;
+use Fewlines\Core\Helper\DirHelper;
 use Fewlines\Core\Application\ProjectManager;
 
 class Translator
@@ -77,6 +78,28 @@ class Translator
                 $entryPoint = $localeDir . '.' . $fileExt;
                 break;
             }
+        }
+
+        /**
+         * If there is no entry point take
+         * all supported translation files
+         * from the given directory
+         */
+
+        if (empty($entryPoint) && is_dir($localeDir)) {
+            $files = DirHelper::scanDir($localeDir);
+            $names = array();
+
+            foreach ($files as $file) {
+                $extension = pathinfo($file['path'], PATHINFO_EXTENSION);
+                $filename = pathinfo($file['path'], PATHINFO_FILENAME);
+
+                if (array_search($extension, self::$translationTypes) !== false) {
+                    $names[] = $filename;
+                }
+            }
+
+            return $names;
         }
 
         // if (true == empty($entryPoint)) {

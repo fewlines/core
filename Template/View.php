@@ -3,6 +3,7 @@ namespace Fewlines\Core\Template;
 
 use Fewlines\Core\Template\Template;
 use Fewlines\Core\Helper\PathHelper;
+use Fewlines\Core\Helper\ArrayHelper;
 use Fewlines\Core\Helper\NamespaceHelper;
 use Fewlines\Core\Application\Registry;
 use Fewlines\Core\Application\ProjectManager;
@@ -15,6 +16,14 @@ class View
      * @var string
      */
     const ACTION_POSTFIX = 'Action';
+
+    /**
+     * All assigned variables to use
+     * in the view
+     *
+     * @var array
+     */
+    private $vars = array();
 
     /**
      * The name of the view (could be overwritten
@@ -82,6 +91,61 @@ class View
      * @var boolean
      */
     private $disableController = false;
+
+    /**
+     * @param {string} $name
+     * @param {mixed} $content
+     * @return self
+     */
+    public function assign($name, $content) {
+        if (is_string($name)) {
+            $this->vars[$name] = $content;
+        }
+        else {
+            throw new View\Exception\InvalidOffsetTypeAssignmentException(
+                'The name of the variable you want to assign must be the
+                type "string"'
+            );
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param {array} $values
+     * @return self
+     */
+    public function assignMultiple($values) {
+        if (ArrayHelper::isAssociative($values)) {
+            foreach ($values as $name => $content) {
+                $this->assign($name, $content);
+            }
+        }
+        else {
+            throw new View\Exception\MultipleValuesNotAssociativeException(
+                'The array given is not associative. You need to pass a
+                name for each variable content you want to assign to the
+                view'
+            );
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return {mixed}
+     */
+    public function getVar($name) {
+        if (array_key_exists($name, $this->vars)) {
+            return $this->vars[$name];
+        }
+        else {
+            throw new View\Exception\VarNotFoundException(
+                'The variable "' . $name . '"" was not found
+                in the view'
+            );
+        }
+    }
 
     /**
      * Returns the name of the rendered view
