@@ -105,6 +105,16 @@ class View implements IView
     }
 
     /**
+     * Returns the current locale
+     * key from the locale component
+     *
+     * @return string
+     */
+    public function getLocaleKey() {
+    	return Locale::getKey();
+    }
+
+    /**
      * Gets a config element by a given
      * path
      *
