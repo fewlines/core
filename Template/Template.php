@@ -248,9 +248,9 @@ class Template extends Renderer
 
             // Create new view
             $this->view = new View(array(
-                    'view' => $view,
-                    'action' => $action
-                ));
+                'view' => $view,
+                'action' => $action
+            ));
         }
 
         return $this;

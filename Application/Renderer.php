@@ -8,11 +8,22 @@ abstract class Renderer
 	/**
 	 * Renders a template
 	 *
+	 * @param string $layout
 	 * @param array $args
+	 * @param boolean $force
 	 */
-	final protected static function renderTemplate($layout, $args = array()) {
+	final protected static function renderTemplate($layout, $args = array(), $force = false) {
 		Buffer::start();
-		Template::getInstance()->setLayout($layout)->setAutoView()->renderAll($args);
+
+		$template = Template::getInstance();
+		$hasLayout = $template->getLayout() instanceof \Fewlines\Core\Template\Layout;
+
+		if ($force == true || ($force == false && ! $hasLayout)) {
+			$template->setLayout($layout)->setAutoView()->renderAll($args);
+		}
+		else if ($hasLayout) {
+			$template->setAutoView()->renderAll($args);
+		}
 	}
 
 	/**
@@ -22,7 +33,7 @@ abstract class Renderer
 	 */
 	final protected static function renderException($args) {
 		Buffer::clear(true);
-		self::renderTemplate(EXCEPTION_LAYOUT, $args);
+		self::renderTemplate(EXCEPTION_LAYOUT, $args, true);
 		exit;
 	}
 };
