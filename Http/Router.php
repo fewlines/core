@@ -118,6 +118,15 @@ class Router extends Router\Routes
 	}
 
 	/**
+	 * Checks if a user route is active
+	 *
+	 * @return boolean
+	 */
+	public function isRouteActive() {
+		return ! is_null($this->activeRoute);
+	}
+
+	/**
 	 * @return \Fewlines\Core\Http\Request
 	 */
 	public function getRequest() {

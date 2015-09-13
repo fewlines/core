@@ -94,6 +94,16 @@ class View implements IView
     }
 
     /**
+     * Checks if the view contains this variable
+     *
+     * @param  string $name
+     * @return boolean
+     */
+    public function has($name) {
+    	return $this->view->hasVar($name);
+    }
+
+    /**
      * Translates a path to a translation
      * string
      *

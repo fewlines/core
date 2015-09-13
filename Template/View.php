@@ -148,6 +148,16 @@ class View
     }
 
     /**
+     * Checks if the variable exists
+     *
+     * @param  string  $name
+     * @return boolean
+     */
+    public function hasVar($name) {
+        return array_key_exists($name, $this->vars);
+    }
+
+    /**
      * Returns the name of the rendered view
      *
      * @return string
@@ -212,7 +222,7 @@ class View
      * @param array $config
      */
     public function __construct($config) {
-        if ( ! is_array($config) && preg_match('/\//', $config)) {
+        if (is_string($config) && preg_match('/\//', $config)) {
             $this->setPath($config);
             $this->disableController = true;
         }
