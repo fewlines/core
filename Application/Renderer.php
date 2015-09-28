@@ -2,6 +2,8 @@
 namespace Fewlines\Core\Application;
 
 use Fewlines\Core\Template\Template;
+use Fewlines\Core\Application\ProjectManager;
+use Fewlines\Core\Locale\Locale;
 
 abstract class Renderer
 {
@@ -33,6 +35,23 @@ abstract class Renderer
 	 */
 	final protected static function renderException($args) {
 		Buffer::clear(true);
+
+		/**
+		 * Reset all to the default
+		 */
+
+		$activeProject = ProjectManager::getActiveProject();
+
+		if ($activeProject) {
+			$activeProject->setActive(false);
+		}
+
+		Locale::set(DEFAULT_LOCALE);
+
+		/**
+		 * Render with the exception layout
+		 */
+
 		self::renderTemplate(EXCEPTION_LAYOUT, $args, true);
 		exit;
 	}

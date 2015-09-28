@@ -104,8 +104,15 @@ class Renderer
             }
         }
         else {
-            // Render layout
-            echo $this->getRenderedHtml($layout->getPath());
+            // Try rendering Render layout
+            if (is_file($layout->getPath())) {
+                echo $this->getRenderedHtml($layout->getPath());
+            }
+            else {
+                throw new Layout\Exception\LayoutNotFoundException(
+                    'The layout "' . $layout->getPath() . '" was not found'
+                );
+            }
         }
     }
 
