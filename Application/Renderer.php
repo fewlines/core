@@ -4,6 +4,7 @@ namespace Fewlines\Core\Application;
 use Fewlines\Core\Template\Template;
 use Fewlines\Core\Application\ProjectManager;
 use Fewlines\Core\Locale\Locale;
+use Fewlines\Core\Http\Header;
 
 abstract class Renderer
 {
@@ -35,6 +36,12 @@ abstract class Renderer
 	 */
 	final protected static function renderException($args) {
 		Buffer::clear(true);
+
+		/**
+		 * Set header status code
+		 */
+
+        Header::set(500, false);
 
 		/**
 		 * Reset all to the default

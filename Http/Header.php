@@ -3,6 +3,7 @@ namespace Fewlines\Core\Http;
 
 use Fewlines\Core\Template\Template;
 use Fewlines\Core\Application\Buffer;
+use Fewlines\Core\Application\ProjectManager;
 
 class Header
 {
@@ -12,6 +13,11 @@ class Header
 	 * @var integer
 	 */
 	const DEFAULT_ERROR_CODE = 500;
+
+	/**
+	 * @type boolean
+	 */
+	private static $running = false;
 
 	/**
 	 * @var array
@@ -81,6 +87,16 @@ class Header
 	 * @param number $code
 	 */
 	public static function set($code, $throw = true) {
+		// Check for recursion
+		if (self::$running == true) {
+			throw new Header\Exception\StillRunningException('
+				Could not (re)set the header, another process
+				is still running. Recursion?
+			');
+		}
+
+		self::$running = true;
+
 		// Check if status message is given
 		if ( ! array_key_exists($code, self::$messages)) {
 			$code = self::DEFAULT_ERROR_CODE;
@@ -113,16 +129,35 @@ class Header
 			 * and layout
 			 */
 
-			Template::getInstance()
-				->setLayout(self::$codeViews[$code]['layout'])
-				->setView(self::$codeViews[$code]['path'])
-				->renderAll();
+			$template = Template::getInstance();
+			$template->setLayout(self::$codeViews[$code]['layout']);
+			$template->setView(self::$codeViews[$code]['routing']['view']);
+
+			$project = ProjectManager::getActiveProject();
+			$ctrlClass = '\\' . $project->getNsName() . CONTROLLER_V_RL_NS . '\\' . self::$codeViews[$code]['routing']['ctrl'];
+
+			if ( ! class_exists($ctrlClass) || ! is_string(self::$codeViews[$code]['routing']['ctrl'])) {
+				$project = ProjectManager::getDefaultProject();
+				$ctrlClass = '\\' . $project->getNsName() . CONTROLLER_V_RL_NS . '\\Error';
+			}
+
+			$template->getView()->setControllerClass($ctrlClass);
+			$template->getView()->setAction(self::$codeViews[$code]['routing']['action']);
+
+			$template->renderAll();
+
+			// Check end to recognize recursion
+			self::$running = false;
 
 			// Abort to prevent further actions
 			exit;
 		}
 		else {
 			if(true == $throw) {
+				// Check end
+				self::$running = false;
+
+				// Throw HTTP exception
 				throw new Header\Exception\HttpException($message);
 			}
 		}
@@ -132,15 +167,40 @@ class Header
 	 * Sets the url of a code so it will be rendered
 	 * instead of the exception
 	 *
-	 * @param number  $code
-	 * @param string  $path
+	 * @param number $code
+	 * @param string|array $routing View OR array(Controller:optionalAction, View)
 	 * @param boolean $condition
 	 */
-	public static function setCodeView($code, $path, $condition = true, $layout = '') {
+	public static function setCodeView($code, $routing, $condition = true, $layout = '') {
 		if (true == $condition) {
+			$controller = '';
+			$action = 'index';
+			$view = '';
+
+			if (is_array($routing)) {
+				$controller = array_key_exists(0, $routing) ? $routing[0] : '';
+
+				// Check if controller string contains view
+				if (preg_match_all('/:/', $controller)) {
+					$parts = explode(':', $controller);
+					$controller = $parts[0];
+					$action = $parts[1];
+				}
+
+				$view = array_key_exists(1, $routing) ? $routing[1] : '';
+			}
+			else if (is_string($routing)){
+				$view = $routing;
+			}
+
+			// Build code array
 			self::$codeViews[$code] = array(
-				'path'   => $path,
-				'layout' => empty($layout) ? DEFAULT_LAYOUT : $layout
+				'routing' => array(
+					'ctrl' => $controller,
+					'action' => $action,
+					'view' => $view
+				),
+				'layout' => empty($layout) ? DEFAULT_LAYOUT : $layout,
 			);
 		}
 	}

@@ -84,15 +84,6 @@ class View
     private $routeController;
 
     /**
-     * Determinates if the controller returns
-     * an empty string - no matter if called
-     * from a view or an route
-     *
-     * @var boolean
-     */
-    private $disableController = false;
-
-    /**
      * @param {string} $name
      * @param {mixed} $content
      * @return self
@@ -224,10 +215,9 @@ class View
     public function __construct($config) {
         if (is_string($config) && preg_match('/\//', $config)) {
             $this->setPath($config);
-            $this->disableController = true;
         }
-        // Set components by default layout
         else if (is_array($config) && array_key_exists('view', $config) && array_key_exists('action', $config)) {
+            // Set components by default layout
             $this->setAction($config['action']);
             $this->setName($config['view']);
             $this->setPath($config['view']);
@@ -236,9 +226,6 @@ class View
         else if (true == ($config instanceof \Fewlines\Core\Http\Router\Routes\Route)) {
             $this->activeRoute = $config;
             $this->setRouteControllerClass($this->activeRoute->getToClass());
-        }
-        else {
-            $this->disableController = true;
         }
     }
 
@@ -279,12 +266,32 @@ class View
         $class.= CONTROLLER_V_RL_NS . '\\' . ucfirst($this->name);
 
         if ( ! class_exists($class)) {
+            HttpHeader::set(404, false);
             throw new View\Exception\ControllerClassNotFoundException(
                 'The class "' . $class . '", for the
                 controller was not found.');
         }
 
         $this->controllerClass = $class;
+    }
+
+    /**
+     * Set the class of the controller
+     * which to call
+     *
+     * @param string $class
+     */
+    public function setControllerClass($class) {
+        if (true == class_exists($class)) {
+            $this->controllerClass = $class;
+        }
+        else {
+            HttpHeader::set(404, false);
+            throw new View\Exception\ControllerClassNotFoundException(
+                'The class "' . $this->controllerClass . '" for the
+                controller was not found.'
+            );
+        }
     }
 
     /**
@@ -302,6 +309,7 @@ class View
                 $this->controllerClass = $class;
             }
             else {
+                HttpHeader::set(404, false);
                 throw new View\Exception\ControllerClassNotFoundException(
                     'The class "' . $this->controllerClass . '" for the
                     controller was not found.'
@@ -309,14 +317,10 @@ class View
             }
         }
         else {
-            if(Registry::get('environment')->isLocal()) {
-                throw new View\Exception\InvalidHttpMethodException(
-                    'Invalid HTTP method found'
-                );
-            }
-            else {
-                HttpHeader::set(404);
-            }
+            HttpHeader::set(404, false);
+            throw new View\Exception\InvalidHttpMethodException(
+                'Invalid HTTP method found'
+            );
         }
     }
 
@@ -347,10 +351,6 @@ class View
      * @return null|*
      */
     public function initController() {
-        if (true == $this->disableController) {
-            return false;
-        }
-
         if (false == is_null($this->activeRoute)) {
             return $this->initRouteController();
         }
@@ -373,8 +373,8 @@ class View
         }
         else {
             throw new View\Exception\ControllerInitialisationGoneWrongException(
-                'The view controller could not be initialized.
-                Must be instance of \Fewlines\Core\Controller\View'
+                'The view controller couldn\'t be initialized.
+                Must inherit from \Fewlines\Core\Controller\View'
             );
         }
 
@@ -412,14 +412,10 @@ class View
      */
     private function callViewAction($method) {
         if (false == method_exists($this->viewController, $method)) {
-            if (Registry::get('environment')->isLocal()) {
-                throw new View\Exception\ActionNotFoundException('Could not found the action (method) "' . $method . '"
-                    - Check the controller "' . $this->controllerClass . '"
-                    for it');
-            }
-            else {
-                HttpHeader::set(404);
-            }
+            HttpHeader::set(404, false);
+            throw new View\Exception\ActionNotFoundException('Could not found the action (method) "' . $method . '"
+                - Check the controller "' . $this->controllerClass . '"
+                for it');
         }
 
         return $this->viewController->{$method}();
@@ -435,14 +431,12 @@ class View
      */
     private function callRouteMethod($method) {
         if (false == method_exists($this->routeController, $method)) {
-            if (Registry::get('environment')->isLocal()) {
-                throw new View\Exception\MethodNotFoundException('Could not found the method "' . $method . '"
-                    - Check the controller "' . $this->controllerClass . '"
-                    for it');
-            }
-            else {
-                HttpHeader::set(404);
-            }
+            HttpHeader::set(404, false);
+            throw new View\Exception\MethodNotFoundException(
+                'Could not found the method "' . $method . '"
+                - Check the controller "' . $this->controllerClass . '"
+                for it'
+            );
         }
 
         return $this->routeController->{$method}();

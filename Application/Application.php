@@ -1,8 +1,6 @@
 <?php
 namespace Fewlines\Core\Application;
 
-use Fewlines\Core\Http\Header;
-
 class Application extends Renderer
 {
     /**
@@ -77,9 +75,6 @@ class Application extends Renderer
 
         // Set shutdown flag
         self::$shutdown = true;
-
-        // Set 500
-        Header::set(500, false);
 
         // Render layout
         self::renderException(array($err));
