@@ -57,4 +57,14 @@ class UrlHelper extends \Fewlines\Core\Helper\View\BaseUrl
 
         return Router::getInstance()->getBaseUrl() . ltrim($parts, "/");
     }
+
+    /**
+     * Removes unecessary slashed in the url
+     *
+     * @param string $url
+     * @return string
+     */
+    public function cleanUrl($url) {
+        return preg_replace('/(\/+)/','/', $url);
+    }
 }

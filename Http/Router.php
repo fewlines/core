@@ -3,6 +3,7 @@ namespace Fewlines\Core\Http;
 
 use Fewlines\Core\Application\Config;
 use Fewlines\Core\Helper\ArrayHelper;
+use Fewlines\Core\Http\Router\Routes\Route;
 
 class Router extends Router\Routes
 {
@@ -22,7 +23,7 @@ class Router extends Router\Routes
 	 * The active route will be set
 	 * if the url matches a given route
 	 *
-	 * @var \Fewlines\Core\Http\Router\Routes\Route
+	 * @var Route
 	 */
 	private $activeRoute;
 
@@ -108,13 +109,118 @@ class Router extends Router\Routes
 			}
 
 			// Check if route is active
-			$currentUrl = implode('/', $this->getUrlParts());
 			foreach ($this->routes as $route) {
-				if (ltrim($route->getFrom(), '/') == $currentUrl) {
-					$this->activeRoute = $route;
+				if ($this->checkRoute($route)) {
+					$this->setRoute($route);
+					break;
 				}
 			}
 		}
+	}
+
+	/**
+	 * Checks if the route is active
+	 *
+	 * @param  Route $route
+	 * @return boolean
+	 */
+	private function checkRoute(Route $route) {
+		if ($route->hasVars()) {
+			$vars = $route->getVars();
+			$parts = ArrayHelper::clean($route->getParts());
+			$diff = ArrayHelper::clean($this->getUrlParts());
+
+			for ($i = 0, $len = count($parts); $i < $len; $i++) {
+				/**
+				 * Check if the url is matching the url
+				 * from the given route, otherwise
+				 * this route was not found in the url
+				 */
+
+				if (trim($diff[$i]) == trim($parts[$i])) {
+					unset($diff[$i]);
+				}
+				else {
+					return false;
+				}
+			}
+
+			$diff = ArrayHelper::clean($diff);
+
+			/**
+			 * Deactivate route if the length of vars
+			 * in the current url is larger then
+			 * the required vars
+			 */
+
+			if (count($diff) > count($vars)) {
+				return false;
+			}
+
+			/**
+			 * Validate given var values
+			 */
+
+			for ($i = 0, $len = count($vars); $i < $len; $i++) {
+
+				/**
+				 * Deactivate route if the required variables were
+				 * not found in the current url (Ignore if they
+				 * are declared as optional).
+				 *
+				 * Otherwise assign the value to the variable
+				 */
+
+				if ( ! array_key_exists($i, $diff)) {
+					if ( ! $vars[$i]->isOptional()) {
+						return false;
+					}
+				}
+				else {
+					$vars[$i]->setValue($diff[$i]);
+				}
+			}
+		}
+		else {
+			$routeParts = ArrayHelper::clean($route->getParts());
+			$urlParts = ArrayHelper::clean($this->getUrlParts());
+
+			/**
+			 * Check if the length of the urlparts
+			 * matches the route parts
+			 */
+
+			if (count($urlParts) > count($routeParts)) {
+				return false;
+			}
+
+			/**
+			 * Check if the url corresponds to
+			 * the parts given in the route
+			 */
+
+			for ($i = 0, $len = count($routeParts); $i < $len; $i++) {
+				if ( ! array_key_exists($i, $urlParts) || trim($urlParts[$i]) != trim($routeParts[$i])) {
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Sets the active route and matches
+	 * the variables of this route
+	 *
+	 * @param Route $route
+	 */
+	private function setRoute(Route $route) {
+
+		// pr($route->getVars());
+		// pr($this->getUrlParts());
+
+		$this->activeRoute = $route;
 	}
 
 	/**

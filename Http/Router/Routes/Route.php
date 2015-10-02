@@ -1,6 +1,9 @@
 <?php
 namespace Fewlines\Core\Http\Router\Routes;
 
+use Fewlines\Core\Helper\UrlHelper;
+use Fewlines\Core\Helper\ArrayHelper;
+
 class Route
 {
 	/**
@@ -19,6 +22,11 @@ class Route
 	private $from;
 
 	/**
+	 * @var array
+	 */
+	private $vars = array();
+
+	/**
 	 * @var string
 	 */
 	private $to;
@@ -32,6 +40,42 @@ class Route
 		$this->type = $type;
 		$this->from = $from;
 		$this->to = $to;
+
+		// Init vars
+		$this->initVars();
+	}
+
+	/**
+	 * Init the variables and removes them from
+	 * the routing url
+	 */
+	private function initVars() {
+		preg_match_all('/\{(.*?)\}/', $this->from, $matches);
+		$this->from = preg_replace('/\{.*\}/', '', $this->from);
+		$this->from = UrlHelper::cleanUrl($this->from);
+
+		// Add vars
+		foreach ($matches[1] as $name) {
+			$this->vars[] = new Variable($name);
+		}
+	}
+
+	/**
+	 * Checks if the route has variables set
+	 *
+	 * @return boolean
+	 */
+	public function hasVars() {
+		return ! empty($this->vars);
+	}
+
+	/**
+	 * Get the vars set from the url
+	 *
+	 * @return array
+	 */
+	public function getVars() {
+		return $this->vars;
 	}
 
 	/**
@@ -67,6 +111,13 @@ class Route
 	 */
 	public function getFrom() {
 		return $this->from;
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getParts() {
+		return ArrayHelper::clean(explode("/", $this->from));
 	}
 
 	/**

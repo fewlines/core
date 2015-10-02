@@ -84,6 +84,29 @@ class View
     private $routeController;
 
     /**
+     * Init the view with some options
+     * called from the layout
+     *
+     * @param array $config
+     */
+    public function __construct($config) {
+        if (is_string($config) && preg_match('/\//', $config)) {
+            $this->setPath($config);
+        }
+        else if (is_array($config) && array_key_exists('view', $config) && array_key_exists('action', $config)) {
+            // Set components by default layout
+            $this->setAction($config['action']);
+            $this->setName($config['view']);
+            $this->setPath($config['view']);
+            $this->setViewControllerClass();
+        }
+        else if (true == ($config instanceof \Fewlines\Core\Http\Router\Routes\Route)) {
+            $this->activeRoute = $config;
+            $this->setRouteControllerClass($this->activeRoute->getToClass());
+        }
+    }
+
+    /**
      * @param {string} $name
      * @param {mixed} $content
      * @return self
@@ -204,29 +227,6 @@ class View
         $viewFile = PathHelper::getRealViewPath($view, $this->getAction(), $layout);
 
         $this->path = $viewFile;
-    }
-
-    /**
-     * Init the view with some options
-     * called from the layout
-     *
-     * @param array $config
-     */
-    public function __construct($config) {
-        if (is_string($config) && preg_match('/\//', $config)) {
-            $this->setPath($config);
-        }
-        else if (is_array($config) && array_key_exists('view', $config) && array_key_exists('action', $config)) {
-            // Set components by default layout
-            $this->setAction($config['action']);
-            $this->setName($config['view']);
-            $this->setPath($config['view']);
-            $this->setViewControllerClass();
-        }
-        else if (true == ($config instanceof \Fewlines\Core\Http\Router\Routes\Route)) {
-            $this->activeRoute = $config;
-            $this->setRouteControllerClass($this->activeRoute->getToClass());
-        }
     }
 
     /**
@@ -391,7 +391,7 @@ class View
 
         if (true == ($this->routeController instanceof \Fewlines\Core\Controller\View)) {
             $this->routeController->init(Template::getInstance());
-            return $this->callRouteMethod($this->activeRoute->getToMethod());
+            return $this->callRouteMethod($this->activeRoute->getToMethod(), $this->activeRoute->getVars());
         }
         else {
             throw new View\Exception\ControllerInitialisationGoneWrongException(
@@ -427,9 +427,10 @@ class View
      * controller
      *
      * @param string $method
+     * @param array $arguments
      * @return *
      */
-    private function callRouteMethod($method) {
+    private function callRouteMethod($method, $arguments) {
         if (false == method_exists($this->routeController, $method)) {
             HttpHeader::set(404, false);
             throw new View\Exception\MethodNotFoundException(
@@ -439,6 +440,6 @@ class View
             );
         }
 
-        return $this->routeController->{$method}();
+        return call_user_func_array(array($this->routeController, $method), $arguments);
     }
 }
