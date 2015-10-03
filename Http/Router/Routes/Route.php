@@ -32,6 +32,11 @@ class Route
 	private $to;
 
 	/**
+	 * @var array
+	 */
+	private $routes = array();
+
+	/**
 	 * @param string $type
 	 * @param string $from
 	 * @param string $to
@@ -58,6 +63,15 @@ class Route
 		foreach ($matches[1] as $name) {
 			$this->vars[] = new Variable($name);
 		}
+	}
+
+	/**
+	 * @param Route $route
+	 * @return self
+	 */
+	public function addRoute(Route $route) {
+		$this->routes[] = $route;
+		return $this;
 	}
 
 	/**

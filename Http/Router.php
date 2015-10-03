@@ -84,36 +84,43 @@ class Router extends Router\Routes
 	 * for incoming routes
 	 */
 	public function update() {
+		// Clear previous routes
+		$this->resetRoutes();
+
 		// Add routes
 		$routeCollection = Config::getInstance()->getElementsByPath('route');
 
 		foreach($routeCollection as $routes) {
 			if ($routes != false) {
-				foreach ($routes->getChildren() as $route) {
-					$name = strtolower($route->getName());
+				// foreach ($routes->getChildren() as $route) {
+				// 	$name = strtolower($route->getName());
 
-					// Add route to parent
-					if (true == preg_match(HTTP_METHODS_PATTERN, $name)) {
-						$this->addRoute($name, $route->getAttribute('from'), $route->getAttribute('to'));
-					}
+				// 	// Add route to parent
+				// 	if (true == preg_match(HTTP_METHODS_PATTERN, $name)) {
+				// 		$this->addRoute($name, $route->getAttribute('from'), $route->getAttribute('to'));
+				// 	}
+				// }
+
+				foreach ($routes->getChildren() as $child) {
+					$this->addRouteByElement($child);
 				}
-			}
 
-			// Add layout if exists
-			if ($routes) {
+				// Add layout if exsits
 				$layout = $routes->getChildByName('layout');
 
 				if ($layout) {
 					$this->routeLayout = $layout->getContent();
 				}
 			}
+		}
 
-			// Check if route is active
-			foreach ($this->routes as $route) {
-				if ($this->checkRoute($route)) {
-					$this->setRoute($route);
-					break;
-				}
+		pr($this->routes);
+
+		// Check if route is active
+		foreach ($this->routes as $route) {
+			if ($this->checkRoute($route)) {
+				$this->setRoute($route);
+				break;
 			}
 		}
 	}
@@ -216,10 +223,6 @@ class Router extends Router\Routes
 	 * @param Route $route
 	 */
 	private function setRoute(Route $route) {
-
-		// pr($route->getVars());
-		// pr($this->getUrlParts());
-
 		$this->activeRoute = $route;
 	}
 

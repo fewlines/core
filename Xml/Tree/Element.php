@@ -209,6 +209,16 @@ class Element
 	}
 
 	/**
+	 * Checks if the xml element contains
+	 * children
+	 *
+	 * @return boolean
+	 */
+	public function hasChildren() {
+		return $this->countChildren() > 0;
+	}
+
+	/**
 	 * Gets a list of all elements with this name.
 	 * Recursive strategy enabled by default.
 	 * It also collects all results if the

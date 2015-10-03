@@ -1,6 +1,8 @@
 <?php
 namespace Fewlines\Core\Http\Router;
 
+use Fewlines\Core\Xml\Tree\Element as XmlElement;
+
 class Routes
 {
 	/**
@@ -9,14 +11,48 @@ class Routes
 	protected $routes = array();
 
 	/**
+	 * Adding the route to the collection (recursive).
+	 * All subroutes will be flattenend and also added
+	 * to this collection, to save the parent element in
+	 * which they are nested in it will given to the
+	 * route
+	 *
+	 * @param XmlElement $element
+	 * @param Routes\Route $parent
+	 */
+	public function addRouteByElement(XmlElement $element, Routes\Route $parent = null) {
+		$name = strtolower($element->getName());
+
+		// Add route to parent
+		if (true == preg_match(HTTP_METHODS_PATTERN, $name)) {
+			$route = $this->createRoute($name, $element->getAttribute('from'), $element->getAttribute('to'));
+
+			if (is_null($parent)) {
+				$this->routes[] = $route;
+			}
+			else {
+				$parent->addRoute($route);
+			}
+
+			// Add children
+			if ($element->hasChildren()) {
+				foreach ($element->getChildren() as $child) {
+					$this->addRouteByElement($child, $route);
+				}
+			}
+		}
+	}
+
+	/**
 	 * Add a route manually
 	 *
 	 * @param string $type
 	 * @param string $from
 	 * @param string $to
+	 * @return Routes\Route
 	 */
-	public function addRoute($type, $from, $to) {
-		$this->routes[] = new Routes\Route($type, $from, $to);
+	public function createRoute($type, $from, $to) {
+		return new Routes\Route($type, $from, $to);
 	}
 
 	/**
@@ -27,5 +63,12 @@ class Routes
 	 */
     public function getRoutes() {
     	return $this->routes;
+    }
+
+    /**
+     * Reset the saved routes
+     */
+    public function resetRoutes() {
+    	$this->routes = [];
     }
 }
