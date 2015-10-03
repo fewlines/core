@@ -19,7 +19,17 @@ class Route
 	/**
 	 * @var string
 	 */
-	private $from;
+	private $from = '';
+
+	/**
+	 * @var string
+	 */
+	private $fromFull = '';
+
+	/**
+	 * @var string
+	 */
+	private $to = '';
 
 	/**
 	 * @var array
@@ -27,14 +37,9 @@ class Route
 	private $vars = array();
 
 	/**
-	 * @var string
+	 * @var Route
 	 */
-	private $to;
-
-	/**
-	 * @var array
-	 */
-	private $routes = array();
+	private $parent;
 
 	/**
 	 * @param string $type
@@ -58,6 +63,7 @@ class Route
 		preg_match_all('/\{(.*?)\}/', $this->from, $matches);
 		$this->from = preg_replace('/\{.*\}/', '', $this->from);
 		$this->from = UrlHelper::cleanUrl($this->from);
+		$this->fullFrom = $this->from;
 
 		// Add vars
 		foreach ($matches[1] as $name) {
@@ -66,12 +72,39 @@ class Route
 	}
 
 	/**
+	 * Sets the parent route and automatically
+	 * updates the url so it will be combined
+	 * recusively with the ones in the parent
+	 * routes
+	 *
 	 * @param Route $route
 	 * @return self
 	 */
-	public function addRoute(Route $route) {
-		$this->routes[] = $route;
+	public function setParent(Route &$route) {
+		$this->parent = $route;
+
+		$current = $this->parent;
+		$fromTmp = array();
+
+		while( ! is_null($current)) {
+			$fromTmp[] = $current->getFrom();
+			$current = $current->getParent();
+		}
+
+		$fromTmp = array_reverse($fromTmp);
+		$fromTmp = implode("", $fromTmp);
+		$fromTmp = UrlHelper::cleanUrl($fromTmp);
+
+		$this->fullFrom = UrlHelper::cleanUrl($fromTmp . $this->fullFrom);
+
 		return $this;
+	}
+
+	/**
+	 * @return Route
+	 */
+	public function getParent() {
+		return $this->parent;
 	}
 
 	/**
@@ -128,10 +161,17 @@ class Route
 	}
 
 	/**
+	 * @return string
+	 */
+	public function getFullFrom() {
+		return $this->fullFrom;
+	}
+
+	/**
 	 * @return array
 	 */
 	public function getParts() {
-		return ArrayHelper::clean(explode("/", $this->from));
+		return ArrayHelper::clean(explode("/", $this->fullFrom));
 	}
 
 	/**

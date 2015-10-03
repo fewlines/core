@@ -92,15 +92,7 @@ class Router extends Router\Routes
 
 		foreach($routeCollection as $routes) {
 			if ($routes != false) {
-				// foreach ($routes->getChildren() as $route) {
-				// 	$name = strtolower($route->getName());
-
-				// 	// Add route to parent
-				// 	if (true == preg_match(HTTP_METHODS_PATTERN, $name)) {
-				// 		$this->addRoute($name, $route->getAttribute('from'), $route->getAttribute('to'));
-				// 	}
-				// }
-
+				// Add routes
 				foreach ($routes->getChildren() as $child) {
 					$this->addRouteByElement($child);
 				}
@@ -113,8 +105,6 @@ class Router extends Router\Routes
 				}
 			}
 		}
-
-		pr($this->routes);
 
 		// Check if route is active
 		foreach ($this->routes as $route) {
