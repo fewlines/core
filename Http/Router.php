@@ -134,7 +134,7 @@ class Router extends Router\Routes
 				 * this route was not found in the url
 				 */
 
-				if (trim($diff[$i]) == trim($parts[$i])) {
+				if (array_key_exists($i, $diff) && trim($diff[$i]) == trim($parts[$i])) {
 					unset($diff[$i]);
 				}
 				else {
