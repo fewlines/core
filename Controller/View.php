@@ -2,6 +2,7 @@
 namespace Fewlines\Core\Controller;
 
 use Fewlines\Core\Helper\UrlHelper;
+use Fewlines\Core\Helper\PathHelper;
 use Fewlines\Core\Application\Config;
 use Fewlines\Core\Http\Request as HttpRequest;
 use Fewlines\Core\Application\ProjectManager;
@@ -75,6 +76,15 @@ class View implements IView
 	public function getBaseUrl($parts = "") {
 		return UrlHelper::getBaseUrl($parts);
 	}
+
+    /**
+     * @param  string $append
+     * @return sting
+     */
+    public function getResourcePath($append) {
+        $project = $this->getProject() ? $this->getProject() : ProjectManager::getDefaultProject();
+        return PathHelper::createPath(array($project->getResourcePath())) . $append;
+    }
 
 	/**
 	 * @param  string $view

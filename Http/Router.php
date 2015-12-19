@@ -88,7 +88,7 @@ class Router extends Router\Routes
 		$this->resetRoutes();
 
 		// Add routes
-		$routeCollection = Config::getInstance()->getElementsByPath('route');
+		$routeCollection = Config::getInstance()->getElementsByPath('routes');
 
 		foreach($routeCollection as $routes) {
 			if ($routes != false) {
@@ -123,9 +123,15 @@ class Router extends Router\Routes
 	 */
 	private function checkRoute(Route $route) {
 		if ($route->hasVars()) {
-			$vars = $route->getVars();
+			$vars = $route->getVarsRecursive();
 			$parts = ArrayHelper::clean($route->getParts());
 			$diff = ArrayHelper::clean($this->getUrlParts());
+
+			if (count($parts) != count($diff)) {
+				return false;
+			}
+
+			$varValues = array();
 
 			for ($i = 0, $len = count($parts); $i < $len; $i++) {
 				/**
@@ -134,7 +140,11 @@ class Router extends Router\Routes
 				 * this route was not found in the url
 				 */
 
-				if (array_key_exists($i, $diff) && trim($diff[$i]) == trim($parts[$i])) {
+				if (array_key_exists($i, $diff) && trim($diff[$i]) == trim($parts[$i])){
+					unset($diff[$i]);
+				}
+				else if (array_key_exists($i, $diff) && preg_match(Route::VAR_MASK, trim($parts[$i]))) {
+					$varValues[] = $diff[$i];
 					unset($diff[$i]);
 				}
 				else {
@@ -144,13 +154,7 @@ class Router extends Router\Routes
 
 			$diff = ArrayHelper::clean($diff);
 
-			/**
-			 * Deactivate route if the length of vars
-			 * in the current url is larger then
-			 * the required vars
-			 */
-
-			if (count($diff) > count($vars)) {
+			if (count($diff) > 0) {
 				return false;
 			}
 
@@ -168,13 +172,11 @@ class Router extends Router\Routes
 				 * Otherwise assign the value to the variable
 				 */
 
-				if ( ! array_key_exists($i, $diff)) {
-					if ( ! $vars[$i]->isOptional()) {
-						return false;
-					}
+				if ( ! array_key_exists($i, $varValues) && ! $vars[$i]->isOptional()) {
+					return false;
 				}
 				else {
-					$vars[$i]->setValue($diff[$i]);
+					$vars[$i]->setValue($varValues[$i]);
 				}
 			}
 		}
@@ -198,7 +200,9 @@ class Router extends Router\Routes
 
 			for ($i = 0, $len = count($routeParts); $i < $len; $i++) {
 				if ( ! array_key_exists($i, $urlParts) || trim($urlParts[$i]) != trim($routeParts[$i])) {
-					return false;
+					if ( ! preg_match(Route::VAR_MASK, $routeParts[$i])) {
+						return false;
+					}
 				}
 			}
 		}

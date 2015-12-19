@@ -391,7 +391,7 @@ class View
 
         if (true == ($this->routeController instanceof \Fewlines\Core\Controller\View)) {
             $this->routeController->init(Template::getInstance());
-            return $this->callRouteMethod($this->activeRoute->getToMethod(), $this->activeRoute->getVars());
+            return $this->callRouteMethod($this->activeRoute->getToMethod(), $this->activeRoute->getVarsRecursive());
         }
         else {
             throw new View\Exception\ControllerInitialisationGoneWrongException(
@@ -441,5 +441,17 @@ class View
         }
 
         return call_user_func_array(array($this->routeController, $method), $arguments);
+    }
+
+    /**
+     * Throws a 404 error and a exception
+     * which defines this error
+     */
+    public function viewNotFound() {
+        HttpHeader::set(404, false);
+
+        throw new View\Exception\ViewNotFoundException(
+            'The view "' . $this->getPath() . '" was not found.'
+        );
     }
 }

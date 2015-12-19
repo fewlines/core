@@ -198,16 +198,13 @@ class Template extends Renderer
      */
     public function setLayout($layout) {
         $project = ProjectManager::getActiveProject();
-        $path = PathHelper::getRealPath(LAYOUT_PATH);
 
         if ($project && $layout != EXCEPTION_LAYOUT) {
-            $path.= PathHelper::getRealPath($project->getId());
+            $path = $project->getLayoutPath();
         }
         else {
-            $path.= PathHelper::getRealPath(ProjectManager::getDefaultProject()->getId());
+            $path = ProjectManager::getDefaultProject()->getLayoutPath();
         }
-
-        $path.= reset(explode(".", $layout)) . '.' . LAYOUT_FILETYPE;
 
         // Set layout
         $this->layout = new Layout($layout, $path);
@@ -376,7 +373,12 @@ class Template extends Renderer
             return call_user_func_array(array($helper, $helperName), $args);
         }
         else {
-            $controller = $this->view->getViewController();
+            if ($this->view->isRouteActive()) {
+                $controller = $this->view->getRouteController();
+            }
+            else {
+                $controller = $this->view->getViewController();
+            }
 
             if ( ! is_null($controller) && method_exists($controller, $name)) {
                 return call_user_func_array(array($controller, $name), $args);

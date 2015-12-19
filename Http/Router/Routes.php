@@ -26,6 +26,12 @@ class Routes
 		// Add route to parent
 		if (true == preg_match(HTTP_METHODS_PATTERN, $name)) {
 			$route = $this->createRoute($name, $element->getAttribute('from'), $element->getAttribute('to'));
+
+			// Add optional attributes
+			if ($element->hasAttribute('id')) {
+				$route->setId($element->getAttribute('id'));
+			}
+
 			$this->routes[] = $route;
 
 			if ( ! is_null($parent)) {

@@ -38,9 +38,10 @@ class ProjectManager
 	 * @param string $id
 	 * @param string $name
 	 * @param string $nsName
+	 * @param string $root
 	 */
-	public static function setDefaultProject($id, $name, $nsName) {
-		self::$default = new ProjectManager\Project($id, $name, "", $nsName);
+	public static function setDefaultProject($id, $name, $nsName, $root) {
+		self::$default = new ProjectManager\Project($id, $name, "", $nsName, $root);
 	}
 
 	/**

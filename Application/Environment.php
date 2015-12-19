@@ -60,6 +60,13 @@ class Environment
 	}
 
 	/**
+	 * @return boolean
+	 */
+	public function hasTypes() {
+		return count($this->types) > 0;
+	}
+
+	/**
 	 * @param  string $type
 	 * @return \Fewlines\Core\Application\Environment\EnvType
 	 */

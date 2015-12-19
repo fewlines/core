@@ -51,6 +51,11 @@ class Bootstrap
 	public function __construct(Application $application) {
 		$this->application = $application;
 		$this->config = Config::getInstance();
+
+        // Add necessary config files
+        if (file_exists(PROJECT_CONFIG_FILE)) {
+            $this->config->addConfigFile(PROJECT_CONFIG_FILE);
+        }
 	}
 
 	/**
@@ -74,8 +79,20 @@ class Bootstrap
      */
     final protected function initDefaultProject() {
         ProjectManager::setDefaultProject(
-                DEFAULT_PROJECT_ID, DEFAULT_PROJECT_NAME, DEFAULT_PROJECT_NS
-            );
+            DEFAULT_PROJECT_ID,
+            DEFAULT_PROJECT_NAME,
+            DEFAULT_PROJECT_NS,
+            DEFAULT_PROJECT_ROOT
+        );
+
+        Config::getInstance()->addConfigFiles(array(
+            array(
+                'dir'  => ProjectManager::getDefaultProject()->getConfigPath(),
+                'type' => 'xml'
+            )
+        ));
+
+        Router::getInstance()->update();
     }
 
 	/**
@@ -122,7 +139,7 @@ class Bootstrap
 	 * in the config
 	 */
 	final protected function initProjects() {
-		$projects = $this->config->getElementByPath('project');
+		$projects = $this->config->getElementByPath('projects');
 
         if ($projects) {
             $activeCount = 0;
@@ -136,7 +153,7 @@ class Bootstrap
                 $id = $proj->getAttribute('id');
                 $name = $proj->getChildByName('name');
                 $description = $proj->getChildByName('description');
-                $nsName = NamespaceHelper::getNamespace($id, 'php');
+                $namespace = $proj->getChildByName('namespace');
 
                 /**
                  * Add a new project to the list
@@ -146,7 +163,7 @@ class Bootstrap
 
                 if ( ! empty($id) && $name && $description) {
                     $project = ProjectManager::addProject(
-                        $id, $name->getContent(), $description->getContent(), $nsName
+                        $id, $name->getContent(), $description->getContent(), $namespace->getContent()
                     );
 
                     /**
@@ -172,7 +189,7 @@ class Bootstrap
                             // Add config files from this project
                             Config::getInstance()->addConfigFiles(array(
                                     array(
-                                        'dir'  => CONFIG_PATH . DR_SP . $project->getId(),
+                                        'dir'  => $project->getConfigPath(),
                                         'type' => 'xml'
                                     )
                                 ));
@@ -184,6 +201,18 @@ class Bootstrap
             }
         }
 	}
+
+    /**
+     * Init the namespaces of the
+     * projects
+     */
+    final protected function initNamespaces() {
+        $autoloader = $this->application->getAutoloader();
+
+        foreach (ProjectManager::getProjects() as $project) {
+            $autoloader->addPsr4(rtrim($project->getNsName(), '\\') . '\\', $project->getNsPath());
+        }
+    }
 
     /**
      * Init the environment types from

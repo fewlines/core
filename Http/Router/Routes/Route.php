@@ -14,7 +14,17 @@ class Route
 	/**
 	 * @var string
 	 */
-	private $type;
+	const VAR_MASK = '/\{(.*?)\}/';
+
+	/**
+	 * @var string
+	 */
+	private $id = '';
+
+	/**
+	 * @var string
+	 */
+	private $type = '';
 
 	/**
 	 * @var string
@@ -48,7 +58,7 @@ class Route
 	 */
 	public function __construct($type, $from, $to) {
 		$this->type = $type;
-		$this->from = $from;
+		$this->from = '/' . trim($from, '/') . '/';
 		$this->to = $to;
 
 		// Init vars
@@ -60,10 +70,10 @@ class Route
 	 * the routing url
 	 */
 	private function initVars() {
-		preg_match_all('/\{(.*?)\}/', $this->from, $matches);
-		$this->from = preg_replace('/\{.*\}/', '', $this->from);
 		$this->from = UrlHelper::cleanUrl($this->from);
 		$this->fullFrom = $this->from;
+
+		preg_match_all(self::VAR_MASK, $this->fullFrom, $matches);
 
 		// Add vars
 		foreach ($matches[1] as $name) {
@@ -92,7 +102,7 @@ class Route
 		}
 
 		$fromTmp = array_reverse($fromTmp);
-		$fromTmp = implode("", $fromTmp);
+		$fromTmp = implode('/', $fromTmp);
 		$fromTmp = UrlHelper::cleanUrl($fromTmp);
 
 		$this->fullFrom = UrlHelper::cleanUrl($fromTmp . $this->fullFrom);
@@ -113,7 +123,7 @@ class Route
 	 * @return boolean
 	 */
 	public function hasVars() {
-		return ! empty($this->vars);
+		return ! empty($this->getVarsRecursive());
 	}
 
 	/**
@@ -123,6 +133,30 @@ class Route
 	 */
 	public function getVars() {
 		return $this->vars;
+	}
+
+	/**
+	 * Gets all vars also from
+	 * it's parent
+	 *
+	 * @return array
+	 */
+	public function getVarsRecursive() {
+		$vars = array();
+
+		$vars[] = $this->getVars();
+		$current = $this->parent;
+
+		while( ! is_null($current)) {
+			$vars[] = array_reverse($current->getVars());
+			$current = $current->getParent();
+		}
+
+		$vars = ArrayHelper::flatten($vars);
+		$vars = ArrayHelper::clean($vars);
+		$vars = array_reverse($vars);
+
+		return $vars;
 	}
 
 	/**
@@ -172,6 +206,20 @@ class Route
 	 */
 	public function getParts() {
 		return ArrayHelper::clean(explode("/", $this->fullFrom));
+	}
+
+	/**
+	 * @param string $id
+	 */
+	public function setId($id) {
+		$this->id = $id;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getId() {
+		return $this->id;
 	}
 
 	/**

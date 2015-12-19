@@ -44,7 +44,7 @@ class Translator
         $project = $project ? $project : ProjectManager::getDefaultProject();
 
         $pathParts = ArrayHelper::clean(explode(self::SUBPATH_SEPERATOR, $path));
-        $localeDir = PathHelper::getRealPath(LOCALE_PATH . DR_SP . $project->getId()) . Locale::getKey();
+        $localeDir = PathHelper::createPath(array($project->getTranslationPath(), Locale::getKey()));
         $entryPoint = '';
         $entryPointIndex = 0;
 

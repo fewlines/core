@@ -2,6 +2,7 @@
 namespace Fewlines\Core\Helper;
 
 use Fewlines\Core\Http\Router;
+use Fewlines\Core\Http\Router\Routes\Route;
 use Fewlines\Core\Helper\ArrayHelper;
 
 class UrlHelper extends \Fewlines\Core\Helper\View\BaseUrl
@@ -58,13 +59,61 @@ class UrlHelper extends \Fewlines\Core\Helper\View\BaseUrl
         return Router::getInstance()->getBaseUrl() . ltrim($parts, "/");
     }
 
+
+    /**
+     * Gets a route from the config
+     * and parse the optional argumuntes
+     * for it
+     *
+     * @param string $id
+     * @param array $arguments
+     * @return string
+     */
+    public static function getRouteUrl($id, $arguments = array()) {
+        foreach (Router::getInstance()->getRoutes() as $route) {
+            $rId = $route->getId();
+
+            if ( ! empty($rId) && trim($rId) == trim($id)) {
+                return static::parseRouteUrl($route->getFullFrom(), $arguments);
+                break;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param string $url
+     * @param array $arguments
+     */
+    public static function parseRouteUrl($url, $arguments = array()) {
+        preg_match_all(Route::VAR_MASK, $url, $matches);
+
+        if (ArrayHelper::isAssociative($arguments)) {
+            for ($i = 0, $len = count($matches[1]); $i < $len; $i++) {
+                if (array_key_exists($matches[1][$i], $arguments)) {
+                    $url = preg_replace('/' . $matches[0][$i] . '/', $arguments[$matches[1][$i]], $url);
+                }
+            }
+        }
+        else {
+            for ($i = 0, $len = count($matches[1]); $i < $len; $i++) {
+                if (array_key_exists($i, $arguments)) {
+                    $url = preg_replace('/' . $matches[0][$i] . '/', $arguments[$i], $url);
+                }
+            }
+        }
+
+        return $url;
+    }
+
     /**
      * Removes unecessary slashed in the url
      *
      * @param string $url
      * @return string
      */
-    public function cleanUrl($url) {
-        return preg_replace('/(\/+)/','/', $url);
+    public static function cleanUrl($url) {
+        return preg_replace('/(\/{1,})/','/', $url);
     }
 }

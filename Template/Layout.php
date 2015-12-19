@@ -1,8 +1,7 @@
 <?php
 namespace Fewlines\Core\Template;
 
-use Fewlines\Core\Template\View;
-use Fewlines\Core\Http\Request as HttpRequest;
+use Fewlines\Core\Helper\PathHelper;
 
 class Layout
 {
@@ -30,8 +29,8 @@ class Layout
      * @param array  $routeUrlParts
      */
     public function __construct($name, $path) {
-        $this->name = $name;
-        $this->path = $path;
+        $this->setName($name);
+        $this->path = PathHelper::normalizePath($path);
     }
 
     /**
@@ -52,7 +51,7 @@ class Layout
      * @return string
      */
     public function getPath() {
-        return $this->path;
+        return $this->path . $this->name . '.' . LAYOUT_FILETYPE;
     }
 
     /**
@@ -67,5 +66,19 @@ class Layout
      */
     public function getView() {
         return $this->view;
+    }
+
+    /**
+     * @param string $path the path
+     */
+    public function setPath($path) {
+        $this->path = $path;
+    }
+
+    /**
+     * @param string $path the path
+     */
+    public function setName($name) {
+        $this->name = pathinfo($name, PATHINFO_FILENAME);
     }
 }

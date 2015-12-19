@@ -5,6 +5,7 @@ use Fewlines\Core\Http\Header as HttpHeader;
 use Fewlines\Core\Helper\PathHelper;
 use Fewlines\Core\Helper\ArrayHelper;
 use Fewlines\Core\Template\Template;
+use Fewlines\Core\Template\View;
 
 class Renderer
 {
@@ -141,7 +142,7 @@ class Renderer
                 }
                 else {
                     if ( ! file_exists($file)) {
-                        HttpHeader::set(404);
+                        $view->viewNotFound();
                     }
 
                     // Output rendered html (view)
@@ -149,11 +150,24 @@ class Renderer
                 }
             }
             else {
-                if(is_string($this->controller)) {
+                if (is_string($this->controller)) {
                     echo $this->controller;
                 }
                 else {
-                    echo '';
+                    $file = $view->getPath();
+
+                    if ( ! empty($file)) {
+                        if ( ! file_exists($file)) {
+                            $view->viewNotFound();
+                        }
+                        else {
+                            // Output view
+                            echo $this->getRenderedHtml($file);
+                        }
+                    }
+                    else {
+                        echo '';
+                    }
                 }
             }
         }
