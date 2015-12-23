@@ -1,290 +1,312 @@
 <?php
-
 namespace Fewlines\Core\Xml\Tree;
 
 use Fewlines\Core\Helper\ArrayHelper;
 
 class Element
 {
-	/**
-	 * The key for all attributes
-	 * of a SimpleXmlElement
-	 *
-	 * @var string
-	 */
-	const ATTRIBUTE_KEY = '@attributes';
 
-	/**
-	 * The (tag)name of the element
-	 *
-	 * @var string
-	 */
-	private $name;
+    /**
+     * The key for all attributes
+     * of a SimpleXmlElement
+     *
+     * @var string
+     */
+    const ATTRIBUTE_KEY = '@attributes';
 
-	/**
-	 * The content of this element
-	 *
-	 * @var string
-	 */
-	private $content;
+    /**
+     * The (tag)name of the element
+     *
+     * @var string
+     */
+    private $name;
 
-	/**
-	 * Holds all attributes of
-	 * the element
-	 *
-	 * @var array
-	 */
-	private $attributes = array();
+    /**
+     * The content of this element
+     *
+     * @var string
+     */
+    private $content;
 
-	/**
-	 * Holds an array of all child elements in the
-	 * first layer
-	 *
-	 * @var array
-	 */
-	private $children = array();
+    /**
+     * Holds all attributes of
+     * the element
+     *
+     * @var array
+     */
+    private $attributes = array();
 
-	/**
-	 * Creates a element
-	 *
-	 * @param string $name
-	 * @param array  $attributes
-	 * @param string $content
-	 */
-	public function __construct($name, $attributes, $content = "")
-	{
-		$this->name       = $name;
-		$this->attributes = $this->addAttributes($attributes);
-		$this->content    = $content;
-	}
+    /**
+     * Holds an array of all child elements in the
+     * first layer
+     *
+     * @var array
+     */
+    private $children = array();
 
-	/**
-	 * Returns the content of this element
-	 * if it's parsed as string
-	 *
-	 * @return string
-	 */
-	public function __toString()
-	{
-		return $this->content;
-	}
+    /**
+     * Creates a element
+     *
+     * @param string $name
+     * @param array  $attributes
+     * @param string $content
+     * @param array $children
+     */
+    public function __construct($name, $attributes = array(), $content = "", $children = array()) {
+        $this->name = $name;
+        $this->attributes = $this->addAttributes($attributes);
+        $this->setContent($content);
+        $this->addChildren($children);
+    }
 
-	/**
-	 * Transforms the attributes
-	 * to a valid array
-	 *
-	 * @param  array $attributes
-	 * @return array
-	 */
-	private function addAttributes($attributes)
-	{
-		if(is_array($attributes) &&
-			array_key_exists(self::ATTRIBUTE_KEY, $attributes))
-		{
-			return $attributes[self::ATTRIBUTE_KEY];
-		}
+    /**
+     * Returns the content of this element
+     * if it's parsed as string
+     *
+     * @return string
+     */
+    public function __toString() {
+        return $this->content;
+    }
 
-		return array();
-	}
+    /**
+     * Adds the children
+     *
+     * @param array $children
+     */
+    public function addChildren($children) {
+        foreach ($children as $child) {
+            if ($child instanceof Element) {
+                $this->children[] = $child;
+            }
+        }
+    }
 
-	/**
-	 * Adds a child to this element
-	 *
-	 * @param \Fewlines\Core\Xml\Element $child
-	 */
-	public function addChild(\Fewlines\Core\Xml\Tree\Element $child)
-	{
-		$this->children[] = $child;
-	}
+    /**
+     * Transforms the attributes
+     * to a valid array
+     *
+     * @param  array $attributes
+     * @return array
+     */
+    private function addAttributes($attributes) {
+        if (is_array($attributes) && array_key_exists(self::ATTRIBUTE_KEY, $attributes)) {
+            return $attributes[self::ATTRIBUTE_KEY];
+        }
+        else if (ArrayHelper::isAssociative($attributes)) {
+            return $attributes;
+        }
 
-	/**
-	 * Returns the name of the element (node)
-	 *
-	 * @return string
-	 */
-	public function getName()
-	{
-		return $this->name;
-	}
+        return array();
+    }
 
-	/**
-	 * Get the content of this element
-	 * Child elements not included
-	 *
-	 * @return string
-	 */
-	public function getContent()
-	{
-		return $this->content;
-	}
+    /**
+     * Adds a child to this element
+     *
+     * @param \Fewlines\Core\Xml\Element $child
+     */
+    public function addChild(\Fewlines\Core\Xml\Tree\Element $child) {
+        $this->children[] = $child;
+    }
 
-	/**
-	 * Sets the content of the element
-	 *
-	 * @param string $content
-	 */
-	public function setContent($content)
-	{
-		$this->content = $content;
-	}
+    /**
+     * Returns the name of the element (node)
+     *
+     * @return string
+     */
+    public function getName() {
+        return $this->name;
+    }
 
-	/**
-	 * Checks if the element has the given
-	 * attribute name
-	 *
-	 * @return boolean
-	 */
-	public function hasAttribute($name) {
-		return (bool)array_key_exists($name, $this->attributes);
-	}
+    /**
+     * Get the content of this element
+     * Child elements not included
+     *
+     * @return string
+     */
+    public function getContent() {
+        return $this->content;
+    }
 
-	/**
-	 * Returns a all attributes
-	 *
-	 * @param  array $exclude
-	 * @return array
-	 */
-	public function getAttributes($exclude = array())
-	{
-		$attributes = $this->attributes;
+    /**
+     * Sets the content of the element
+     *
+     * @param string $content
+     */
+    public function setContent($content) {
+        $this->content = $content;
+    }
 
-		if(false == empty($exclude))
-		{
-			foreach($exclude as $value)
-			{
-				if(array_key_exists($value, $attributes))
-				{
-					unset($attributes[$value]);
-				}
-			}
-		}
+    /**
+     * Checks if the element has the given
+     * attribute name
+     *
+     * @return boolean
+     */
+    public function hasAttribute($name) {
+        return (bool)array_key_exists($name, $this->attributes);
+    }
 
-		return $attributes;
-	}
+    /**
+     * Returns a all attributes
+     *
+     * @param  array $exclude
+     * @return array
+     */
+    public function getAttributes($exclude = array()) {
+        $attributes = $this->attributes;
 
-	/**
-	 * Adds a attribute with a name and value
-	 *
-	 * @param string $name
-	 * @param string $value
-	 */
-	public function addAttribute($name, $value = '') {
-		$this->attributes[$name] = $value;
-	}
+        if (false == empty($exclude)) {
+            foreach ($exclude as $value) {
+                if (array_key_exists($value, $attributes)) {
+                    unset($attributes[$value]);
+                }
+            }
+        }
 
-	/**
-	 * Get one attribute (if exists)
-	 *
-	 * @param  string $key
-	 * @return string
-	 */
-	public function getAttribute($key)
-	{
-		if(array_key_exists($key, $this->attributes))
-		{
-			return $this->attributes[$key];
-		}
+        return $attributes;
+    }
 
-		return '';
-	}
+    /**
+     * Adds a attribute with a name and value
+     *
+     * @param string $name
+     * @param string $value
+     */
+    public function addAttribute($name, $value = '') {
+        $this->attributes[$name] = $value;
+    }
 
-	/**
-	 * Returns all children
-	 *
-	 * @return array
-	 */
-	public function getChildren()
-	{
-		return $this->children;
-	}
+    /**
+     * Get one attribute (if exists)
+     *
+     * @param  string $key
+     * @return string
+     */
+    public function getAttribute($key) {
+        if (array_key_exists($key, $this->attributes)) {
+            return $this->attributes[$key];
+        }
 
-	/**
-	 * Returns the number of the children
-	 *
-	 * @return integer
-	 */
-	public function countChildren()
-	{
-		return count($this->children);
-	}
+        return '';
+    }
 
-	/**
-	 * Checks if the xml element contains
-	 * children
-	 *
-	 * @return boolean
-	 */
-	public function hasChildren() {
-		return $this->countChildren() > 0;
-	}
+    /**
+     * Returns all children
+     *
+     * @return array
+     */
+    public function getChildren() {
+        return $this->children;
+    }
 
-	/**
-	 * Gets a list of all elements with this name.
-	 * Recursive strategy enabled by default.
-	 * It also collects all results if the
-	 * parameter is set to true (Without reference
-	 * variables)
-	 *
-	 * @param  string  $name
-	 * @param  boolean $recursive
-	 * @param  boolean $collect
-	 * @return \Fewlines\Core\Xml\Tree\Element|boolean|array
-	 */
-	public function getChildrenByName($name, $collect = true, $recursive = true)
-	{
-		$children = array();
+    /**
+     * Returns the number of the children
+     *
+     * @return integer
+     */
+    public function countChildren() {
+        return count($this->children);
+    }
 
-		for($i = 0; $i < count($this->children); $i++)
-		{
-			$child = $this->children[$i];
+    /**
+     * Checks if the xml element contains
+     * children
+     *
+     * @return boolean
+     */
+    public function hasChildren() {
+        return $this->countChildren() > 0;
+    }
 
-			if($child->getName() == $name)
-			{
- 				if(false == $collect)
- 				{
- 					return $child;
- 				}
- 				else
- 				{
- 					$children[] = $child;
- 				}
-			}
-			else if($child->countChildren() > 0 &&
-				true == $recursive)
-			{
-				if(false == $collect)
-				{
-					return $child->getChildByName($name);
-				}
-				else
-				{
-					$depthChilds = $child->getChildByName($name, $collect);
+    /**
+     * Gets a list of all elements with this name.
+     * Recursive strategy enabled by default.
+     * It also collects all results if the
+     * parameter is set to true (Without reference
+     * variables)
+     *
+     * @param  string  $name
+     * @param  boolean $recursive
+     * @param  boolean $collect
+     * @return Element|boolean|array
+     */
+    public function getChildrenByName($name, $collect = true, $recursive = true) {
+        $children = array();
 
-					if(false == empty($depthChilds))
-					{
-						$children[] = $depthChilds;
-					}
-				}
-			}
-		}
+        for ($i = 0; $i < count($this->children); $i++) {
+            $child = $this->children[$i];
 
-		if(true == $collect)
-		{
-			return ArrayHelper::flatten($children);
-		}
+            if ($child->getName() == $name) {
+                if (!$collect) {
+                    return $child;
+                }
+                else {
+                    $children[] = $child;
+                }
+            }
 
-		return false;
-	}
+            if ($child->countChildren() > 0 && $recursive) {
+                if (!$collect) {
+                    $depthChild = $child->getChildByName($name, $recursive);
 
-	/**
-	 * Gets a children by the name
-	 *
-	 * @param  string  $name
-	 * @param  boolean $recursive
-	 * @return array
-	 */
-	public function getChildByName($name, $recursive = true)
-	{
-		return $this->getChildrenByName($name, false, $recursive);
-	}
+                    if ($depthChild) {
+                        return $depthChild;
+                    }
+                }
+                else {
+                    $depthChilds = $child->getChildrenByName($name, $collect, $recursive);
+
+                    if ($depthChilds) {
+                        $children[] = $depthChilds;
+                    }
+                }
+            }
+        }
+
+        if (true == $collect) {
+            return ArrayHelper::flatten($children);
+        }
+
+        return false;
+    }
+
+    /**
+     * Gets a children by the name
+     *
+     * @param  string  $name
+     * @param  boolean $recursive
+     * @return array
+     */
+    public function getChildByName($name, $recursive = true) {
+        return $this->getChildrenByName($name, false, $recursive);
+    }
+
+    /**
+     * Saves the elements and it's children
+     *
+     * @param \XmlWriter &$xmlWriter
+     */
+    public function save(&$xmlWriter) {
+        // Start element
+        $xmlWriter->startElement($this->name);
+
+        // Write content
+        if (!empty($this->content)) {
+            $xmlWriter->text($this->getContent());
+        }
+
+        // Add attributes
+        foreach ($this->attributes as $name => $value) {
+            $xmlWriter->writeAttribute($name, $value);
+        }
+
+        // Save children
+        foreach ($this->getChildren() as $child) {
+            $child->save($xmlWriter);
+        }
+
+        // Close element
+        $xmlWriter->endElement();
+    }
 }

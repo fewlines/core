@@ -38,7 +38,9 @@ class PathHelper
      * @return string
      */
     public static function normalizePath($path) {
-        $path = preg_replace('/\\\/', DR_SP, $path);
+        $path = preg_replace('/\\\|\//', DR_SP, $path);
+        $path = preg_replace('/\/{1,}/', DR_SP, $path);
+
         return $path;
     }
 
@@ -73,13 +75,12 @@ class PathHelper
      */
     public static function getRealViewPath($view = '', $action = '', $layout = '') {
         $project = ProjectManager::getActiveProject();
-        $path = self::getRealPath(VIEW_PATH);
 
         if ($project && $layout != EXCEPTION_LAYOUT) {
-            $path.= self::getRealPath($project->getId());
+            $path = $project->getViewPath();
         }
         else {
-            $path.= self::getRealPath(ProjectManager::getDefaultProject()->getId());
+            $path = ProjectManager::getDefaultProject()->getViewPath();
         }
 
         if (false == empty($layout)) {
@@ -137,7 +138,10 @@ class PathHelper
      * @return boolean
      */
     public static function isView($path) {
-        $exp = '/' . preg_replace('/\//', '\\/', self::normalizePath(VIEW_PATH)) . '/';
+        $project = ProjectManager::getActiveProject();
+        $project = $project ? $project : ProjectManager::getDefaultProject();
+
+        $exp = '/' . preg_replace('/\//', '\\/', self::normalizePath($project->getViewPath())) . '/';
         return preg_match($exp, self::normalizePath($path));
     }
 
@@ -156,5 +160,12 @@ class PathHelper
         }
 
         return false;
+    }
+
+    /**
+     * @return string
+     */
+    public static function getBasePath() {
+        return static::normalizePath(ROOT_DIR);
     }
 }

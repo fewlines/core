@@ -154,6 +154,8 @@ class Header
 		}
 		else {
 			if(true == $throw) {
+				self::$running = false;
+
 				// Throw HTTP exception
 				throw new Header\Exception\HttpException($message);
 			}

@@ -2,6 +2,7 @@
 namespace Fewlines\Core\Controller;
 
 use Fewlines\Core\Helper\UrlHelper;
+use Fewlines\Core\Helper\PathHelper;
 use Fewlines\Core\Application\Config;
 use Fewlines\Core\Http\Request as HttpRequest;
 use Fewlines\Core\Application\ProjectManager;
@@ -91,6 +92,30 @@ class View implements IView
      */
     public function getProject() {
         return ProjectManager::getActiveProject();
+    }
+
+    /**
+     * Counts all available projects registered
+     * in the config file
+     *
+     * @return booleam
+     */
+    public function countProjects() {
+        return count(ProjectManager::getProjects());
+    }
+
+    /**
+     * Returns the first project registered
+     *
+     * @return \Fewlines\Core\Application\ProjectManager\Project
+     */
+    public function getFirstProject() {
+        if ($this->countProjects() > 0) {
+            $projects = ProjectManager::getProjects();
+            return $projects[0];
+        }
+
+        return null;
     }
 
     /**

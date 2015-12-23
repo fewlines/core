@@ -19,45 +19,68 @@ class Tree
 	 *
 	 * @param \SimpleXmlElement $root
 	 */
-	public function __construct(\SimpleXmlElement $root)
+	public function __construct($root = null)
 	{
-		// "Transform" the node to a element
-		$this->tree = new Element($root->getName(),
-			(array) $root->attributes(), trim((string) $root));
+		if ($root instanceof \SimpleXmlElement) {
+			// "Transform" the node to a element
+			$this->tree = new Element($root->getName(),
+				(array) $root->attributes(), trim((string) $root));
 
-		// Add all child elements
-		foreach($root as $node)
-		{
-			$this->addChild($node, $this->tree);
+			// Add all child elements
+			foreach($root as $node)
+			{
+				$this->addChild($node, $this->tree);
+			}
+		}
+		else {
+			$this->tree = null;
 		}
 	}
 
 	/**
 	 * Add the node to a position under the tree
 	 *
-	 * @param \SimpleXmlElement $node
-	 * @param \Fewlines\Core\Xml\Tree\Element $parent
+	 * @param \SimpleXmlElement|Element $node
+	 * @param Element $parent
 	 */
-	public function addChild(\SimpleXmlElement $node, $parent)
+	public function addChild($node, $parent = null)
 	{
-		if(false == $node instanceof \SimpleXmlElement)
-		{
-			return;
-		}
+		if ($node instanceof \SimpleXmlElement) {
+			$name       = $node->getName();
+			$attributes = (array) $node->attributes();
+			$content    = trim((string) $node);
+			$element    = new Element($name, $attributes, $content);
 
-		$name       = $node->getName();
-		$attributes = (array) $node->attributes();
-		$content    = trim((string) $node);
-		$element    = new Element($name, $attributes, $content);
+			if ( ! $this->tree) {
+				$this->tree = $element;
+			}
+			else {
+				if ( ! $parent) {
+					$parent = $this->tree;
+				}
 
-		$parent->addChild($element);
+				$parent->addChild($element);
+			}
 
-		// Add child elements recursive
-		if($node->count() > 0)
-		{
-			foreach($node as $childNode)
+			// Add child elements recursive
+			if($node->count() > 0)
 			{
-				$this->addChild($childNode, $element);
+				foreach($node as $childNode)
+				{
+					$this->addChild($childNode, $element);
+				}
+			}
+		}
+		else if ($node instanceof Element) {
+			if ( ! $this->tree) {
+				$this->tree = $node;
+			}
+			else {
+				if ( ! $parent) {
+					$parent = $this->tree;
+				}
+
+				$parent->addChild($node);
 			}
 		}
 	}
@@ -70,5 +93,15 @@ class Tree
 	public function getElement()
 	{
 		return $this->tree;
+	}
+
+	/**
+	 * Tells if the tree has a root element
+	 *
+	 * @return boolean
+	 */
+	public function hasRoot()
+	{
+		return $this->tree != null;
 	}
 }

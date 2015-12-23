@@ -5,6 +5,7 @@ use Fewlines\Core\Template\Template;
 use Fewlines\Core\Application\ProjectManager;
 use Fewlines\Core\Locale\Locale;
 use Fewlines\Core\Http\Header;
+use Fewlines\Core\Command\Application as CmdApplication;
 
 abstract class Renderer
 {
@@ -27,6 +28,16 @@ abstract class Renderer
 		else if ($hasLayout) {
 			$template->setAutoView()->renderAll($args);
 		}
+	}
+
+	/**
+	 * Executes and renders a command from the
+	 * command line
+	 */
+	final protected static function renderCommand() {
+		$cmdApp = new CmdApplication();
+		$cmdApp->addAll();
+		$cmdApp->run();
 	}
 
 	/**

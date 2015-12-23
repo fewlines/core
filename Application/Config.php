@@ -45,21 +45,15 @@ class Config
     private $xmls = array();
 
     /**
-     * Load config files
-     *
-     * @param array $configs
      * @throws Exception\ConfigJustInstantiatedException
      */
-    public function __construct($configs) {
+    public function __construct() {
         if (false == is_null(self::$instance)) {
             throw new Exception\ConfigJustInstantiatedException("
-					The config object has already been instantiated.
-					Use the static function \"getInstance\" instead.
-				");
+				The config object has already been instantiated.
+				Use the static function \"getInstance\" instead.
+			");
         }
-
-        // Add config files
-        $this->addConfigFiles($configs);
 
         // Set instance for singletons
         self::$instance = $this;
@@ -72,7 +66,7 @@ class Config
      */
     public static function getInstance() {
         if (true == is_null(self::$instance)) {
-            self::$instance = new self(getConfig());
+            self::$instance = new self();
         }
 
         return self::$instance;
@@ -108,6 +102,14 @@ class Config
     }
 
     /**
+     * @param string $file path to the file
+     */
+    public function addConfigFile($file) {
+        $this->configFiles[] = $file;
+        $this->updateFiles();
+    }
+
+    /**
      * Updates the current file list
      */
     private function updateFiles() {
@@ -122,8 +124,13 @@ class Config
             $ignore = preg_match("/^_(.*)$/", $filename);
 
             if ( ! $ignore) {
-                $this->xmls[] = new Xml($filePath);
-                $this->loadedConfigFiles[] = $filePath;
+                $xml = new Xml($filePath);
+
+                // Only load valid config files
+                if ($xml->isValid()) {
+                    $this->xmls[] = new Xml($filePath);
+                    $this->loadedConfigFiles[] = $filePath;
+                }
             }
         }
 
