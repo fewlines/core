@@ -77,15 +77,6 @@ class View implements IView
 		return UrlHelper::getBaseUrl($parts);
 	}
 
-    /**
-     * @param  string $append
-     * @return sting
-     */
-    public function getResourcePath($append) {
-        $project = $this->getProject() ? $this->getProject() : ProjectManager::getDefaultProject();
-        return PathHelper::createPath(array($project->getResourcePath())) . $append;
-    }
-
 	/**
 	 * @param  string $view
 	 * @return string
@@ -101,6 +92,30 @@ class View implements IView
      */
     public function getProject() {
         return ProjectManager::getActiveProject();
+    }
+
+    /**
+     * Counts all available projects registered
+     * in the config file
+     *
+     * @return booleam
+     */
+    public function countProjects() {
+        return count(ProjectManager::getProjects());
+    }
+
+    /**
+     * Returns the first project registered
+     *
+     * @return \Fewlines\Core\Application\ProjectManager\Project
+     */
+    public function getFirstProject() {
+        if ($this->countProjects() > 0) {
+            $projects = ProjectManager::getProjects();
+            return $projects[0];
+        }
+
+        return null;
     }
 
     /**

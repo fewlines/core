@@ -150,7 +150,7 @@ class Bootstrap
                  * from the xml element frame
                  */
 
-                $id = $proj->getAttribute('id');
+                $id = $proj->getName();
                 $name = $proj->getChildByName('name');
                 $description = $proj->getChildByName('description');
                 $namespace = $proj->getChildByName('namespace');

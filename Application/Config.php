@@ -124,8 +124,13 @@ class Config
             $ignore = preg_match("/^_(.*)$/", $filename);
 
             if ( ! $ignore) {
-                $this->xmls[] = new Xml($filePath);
-                $this->loadedConfigFiles[] = $filePath;
+                $xml = new Xml($filePath);
+
+                // Only load valid config files
+                if ($xml->isValid()) {
+                    $this->xmls[] = new Xml($filePath);
+                    $this->loadedConfigFiles[] = $filePath;
+                }
             }
         }
 

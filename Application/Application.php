@@ -4,12 +4,30 @@ namespace Fewlines\Core\Application;
 class Application extends Renderer
 {
     /**
+     * @var integer
+     */
+    const ENVIRONMENT_WEB = 0;
+
+    /**
+     * @var integer
+     */
+    const ENVIRONMENT_CMD = 1;
+
+    /**
      * Determinates if the application
      * was shut down
      *
      * @var boolean
      */
     private static $shutdown = false;
+
+    /**
+     * Defines the environment the application
+     * is running
+     *
+     * @var integer
+     */
+    public static $environment;
 
     /**
      * Tells wether the application was already
@@ -46,9 +64,6 @@ class Application extends Renderer
 
         // Set autoloader
         $this->autoloader = $autoloader;
-
-        // Setup application
-        $this->setup();
     }
 
     /**
@@ -58,7 +73,12 @@ class Application extends Renderer
      *
      * @return self
      */
-    public function bootstrap() {
+    public function bootstrap($environment = Application::ENVIRONMENT_WEB) {
+        static::$environment = $environment;
+
+         // Setup application
+        $this->setup();
+
         try {
             Buffer::start();
 
@@ -74,7 +94,15 @@ class Application extends Renderer
             }
         }
         catch(\Exception $err) {
-           self::renderException(array($err));
+            switch (static::$environment) {
+                case Application::ENVIRONMENT_WEB:
+                    self::renderException(array($err));
+                    break;
+
+                case Application::ENVIRONMENT_CMD:
+                    throw $err;
+                    break;
+            }
         }
 
         return $this;
@@ -86,12 +114,29 @@ class Application extends Renderer
      * @return boolean
      */
     public function run() {
+        $this->running = true;
+
         try {
-            $this->running = true;
-            self::renderTemplate(DEFAULT_LAYOUT);
+            switch (static::$environment) {
+                case Application::ENVIRONMENT_WEB:
+                    self::renderTemplate(DEFAULT_LAYOUT);
+                    break;
+
+                case Application::ENVIRONMENT_CMD:
+                    self::renderCommand();
+                    break;
+            }
         }
         catch(\Exception $err) {
-            self::renderException(array($err));
+            switch (static::$environment) {
+                case Application::ENVIRONMENT_WEB:
+                    self::renderException(array($err));
+                    break;
+
+                case Application::ENVIRONMENT_CMD:
+                    throw $err;
+                    break;
+            }
         }
     }
 
@@ -109,7 +154,9 @@ class Application extends Renderer
         self::$shutdown = true;
 
         // Render layout
-        self::renderException(array($err));
+        if (static::$environment == Application::ENVIRONMENT_WEB) {
+            self::renderException(array($err));
+        }
     }
 
     /**
@@ -140,16 +187,20 @@ class Application extends Renderer
          * views, layout, routes, ...
          */
 
+        if (static::$environment == Application::ENVIRONMENT_WEB) {
+            define('ERROR_HANDLER',        true);
+            define('DEFAULT_PROJECT_ROOT', realpath(ROOT_DIR . './../vendor/fewlines/project'));
+        }
+        else if (static::$environment == Application::ENVIRONMENT_CMD) {
+            define('ERROR_HANDLER',        false);
+            define('DEFAULT_PROJECT_ROOT', realpath(ROOT_DIR . '/vendor/fewlines/project'));
+        }
+
         define('LAYOUT_FILETYPE',      'phtml');
         define('VIEW_FILETYPE',        'phtml');
         define('DEFAULT_ERROR_VIEW',   'error');
         define('DEFAULT_LAYOUT',       'default');
         define('EXCEPTION_LAYOUT',     'exception');
-
-        define('DEFAULT_PROJECT_ROOT', realpath(ROOT_DIR . './../vendor/fewlines/project'));
-        define('DEFAULT_PROJECT_ID',   'fewlines');
-        define('DEFAULT_PROJECT_NAME', 'Fewlines framework');
-        define('DEFAULT_PROJECT_NS',   'Fewlines\Core');
 
         define('BOOTSTRAP_RL_NS',      '\Application\Bootstrap');
         define('CONTROLLER_V_RL_NS',   '\Controller\View');
@@ -159,18 +210,26 @@ class Application extends Renderer
         define('URL_LAYOUT_ROUTE',     '/view:index/action:index');
 
         define('DEVELOPER_DEBUG',      true);
-        define('ERROR_HANDLER',        true);
         define('DEFAULT_LOCALE',       'en');
         define('DR_SP',                '/');
+
+        define('DEFAULT_PROJECT_ID',   'fewlines');
+        define('DEFAULT_PROJECT_NAME', 'Fewlines framework');
+        define('DEFAULT_PROJECT_NS',   'Fewlines\Core');
 
         /**
          * Paths relative to the
          * user projects
          */
 
-        define('PROJECT_CONFIG_FILE', ROOT_DIR . DR_SP . 'projects' . DR_SP . 'projects.xml');
+        if (static::$environment == Application::ENVIRONMENT_WEB) {
+            define('PROJECT_ROOT_PATH', ROOT_DIR . DR_SP . 'projects');
+        }
+        else if (static::$environment == Application::ENVIRONMENT_CMD) {
+            define('PROJECT_ROOT_PATH', ROOT_DIR . DR_SP . 'public' . DR_SP . 'projects');
+        }
 
-        define('PROJECT_ROOT_PATH', ROOT_DIR . DR_SP . 'projects');
+        define('PROJECT_CONFIG_FILE', PROJECT_ROOT_PATH . DR_SP . 'projects.xml');
         define('PROJECT_CLASS_PATH', 'classes');
         define('PROJECT_RESOURCE_PATH', 'resources');
         define('PROJECT_TEMPLATE_PATH', 'templates');
