@@ -4,6 +4,7 @@ namespace Fewlines\Core\Http;
 use Fewlines\Core\Application\Config;
 use Fewlines\Core\Helper\ArrayHelper;
 use Fewlines\Core\Http\Router\Routes\Route;
+use Fewlines\Core\Http\Router\Routes\Variable;
 
 class Router extends Router\Routes
 {
@@ -84,9 +85,6 @@ class Router extends Router\Routes
 	 * for incoming routes
 	 */
 	public function update() {
-		// Clear previous routes
-		$this->resetRoutes();
-
 		// Add routes
 		$routeCollection = Config::getInstance()->getElementsByPath('routes');
 
@@ -128,7 +126,18 @@ class Router extends Router\Routes
 			$diff = ArrayHelper::clean($this->getUrlParts());
 
 			if (count($parts) != count($diff)) {
-				return false;
+				for ($i = 0, $len = count($parts); $i < $len; $i++) {
+					if (preg_match(Route::VAR_MASK, trim($parts[$i])) && ! array_key_exists($i, $diff)) {
+						if (Variable::isStringOptional($parts[$i])) {
+							unset($parts[$i]);
+						}
+						else {
+							return false;
+						}
+					}
+				}
+
+				$parts = ArrayHelper::clean($parts);
 			}
 
 			$varValues = array();
@@ -172,8 +181,13 @@ class Router extends Router\Routes
 				 * Otherwise assign the value to the variable
 				 */
 
-				if ( ! array_key_exists($i, $varValues) && ! $vars[$i]->isOptional()) {
-					return false;
+				if ( ! array_key_exists($i, $varValues)) {
+					if ($vars[$i]->isOptional()) {
+						$vars[$i]->setValue('');
+					}
+					else {
+						return false;
+					}
 				}
 				else {
 					$vars[$i]->setValue($varValues[$i]);

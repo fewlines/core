@@ -56,7 +56,7 @@ class Variable
 	}
 
 	/**
-	 * @param string
+	 * @return string
 	 */
 	public function getName() {
 		return $this->name;
@@ -67,6 +67,19 @@ class Variable
 	 */
 	public function isOptional() {
 		return $this->optional;
+	}
+
+	/**
+	 * @param string $var
+	 */
+	public static function isStringOptional($var) {
+		preg_match(Route::VAR_MASK, $var, $matches);
+
+		if (array_key_exists(1, $matches) && ! empty($matches[1])) {
+			return substr($matches[1], 0, 1) == self::OPTIONAL_FLAG;
+		}
+
+		return false;
 	}
 
 	/**
