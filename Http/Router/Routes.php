@@ -25,14 +25,14 @@ class Routes
 
 		// Add route to parent
 		if (true == preg_match(HTTP_METHODS_PATTERN, $name)) {
-			$route = $this->createRoute($name, $element->getAttribute('from'), $element->getAttribute('to'));
+			$route = static::createRoute($name, $element->getAttribute('from'), $element->getAttribute('to'));
 
 			// Add optional attributes
 			if ($element->hasAttribute('id')) {
 				$route->setId($element->getAttribute('id'));
 			}
 
-			$this->routes[] = $route;
+			$this->add($route);
 
 			if ( ! is_null($parent)) {
 				$route->setParent($parent);
@@ -55,8 +55,44 @@ class Routes
 	 * @param string $to
 	 * @return Routes\Route
 	 */
-	public function createRoute($type, $from, $to) {
+	public static function createRoute($type, $from, $to) {
 		return new Routes\Route($type, $from, $to);
+	}
+
+	/**
+	 * Checks if a route exists
+	 *
+	 * @param Routes\Route $route
+	 * @return integer
+	 */
+	public function routeExists(Routes\Route $route) {
+		for ($i = 0, $len = count($this->routes); $i < $len; $i++) {
+			if ($this->routes[$i]->equals($route)) {
+				return $i;
+			}
+		}
+
+		return -1;
+	}
+
+	/**
+	 * Adds a route
+	 *
+	 * @param Routes\Route $route
+	 * @return self
+	 */
+	public function add(Routes\Route $route) {
+		$index = $this->routeExists($route);
+
+		// Overwrite the old route
+		if ($index > -1) {
+			$this->routes[$index] = $route;
+		}
+		else {
+			$this->routes[] = $route;
+		}
+
+		return $this;
 	}
 
 	/**

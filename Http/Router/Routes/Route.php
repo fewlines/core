@@ -160,6 +160,17 @@ class Route
 	}
 
 	/**
+	 * @return boolean
+	 */
+	public function equals(Route $route) {
+		$fullFromRoute = preg_replace(self::VAR_MASK, '?', $route->getFullFrom());
+		$fullFromSelf = preg_replace(self::VAR_MASK, '?', $this->getFullFrom());
+
+		return ($fullFromRoute == $fullFromSelf &&
+			$route->getType() == $this->getType());
+	}
+
+	/**
 	 * @param string $to
 	 */
 	public function setType($type) {
