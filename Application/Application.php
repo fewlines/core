@@ -189,7 +189,7 @@ class Application extends Renderer
 
         if (static::$environment == Application::ENVIRONMENT_WEB) {
             define('ERROR_HANDLER',        true);
-            define('DEFAULT_PROJECT_ROOT', realpath(ROOT_DIR . './../vendor/fewlines/project'));
+            define('DEFAULT_PROJECT_ROOT', realpath(ROOT_DIR . '/../vendor/fewlines/project'));
         }
         else if (static::$environment == Application::ENVIRONMENT_CMD) {
             define('ERROR_HANDLER',        false);
