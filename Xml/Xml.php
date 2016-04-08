@@ -125,7 +125,9 @@ class Xml
                 $resultList = $result->getChildrenByName($parts[$i]);
             }
 
-            $result = $result->getChildByName($parts[$i]);
+            if ($result) {
+                $result = $result->getChildByName($parts[$i]);
+            }
         }
 
         if (true == $collect) {
