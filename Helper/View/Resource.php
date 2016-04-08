@@ -1,8 +1,7 @@
 <?php
 namespace Fewlines\Core\Helper\View;
 
-use Fewlines\Core\Application\ProjectManager;
-use Fewlines\Core\Helper\PathHelper;
+use Fewlines\Core\Helper\ResourceHelper;
 
 class Resource extends \Fewlines\Core\Helper\AbstractViewHelper
 {
@@ -15,22 +14,6 @@ class Resource extends \Fewlines\Core\Helper\AbstractViewHelper
      * @return string
      */
     public function resource($path, $absolute = false) {
-    	$project = ProjectManager::getActiveProject();
-    	$resPath = '';
-
-    	if ($project) {
-    		$resPath.= $project->getResourcePath();
-    	}
-    	else {
-    		$resPath.= ProjectManager::getDefaultProject()->getResourcePath();
-    	}
-
-    	$resPath.= $path;
-
-        if ( ! $absolute)  {
-            $resPath = str_replace(PathHelper::getBasePath(), '', $resPath);
-        }
-
-        return PathHelper::normalizePath($resPath);
+        return ResourceHelper::getPath($path, $absolute);
     }
 }
