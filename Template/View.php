@@ -55,6 +55,13 @@ class View
     private $path;
 
     /**
+     * The name of the view set in the path
+     *
+     * @var string
+     */
+    private $pathView;
+
+    /**
      * Controller class of the current view
      *
      * @var string
@@ -226,6 +233,7 @@ class View
         $layout = Template::getInstance()->getLayout()->getName();
         $viewFile = PathHelper::getRealViewPath($view, $this->getAction(), $layout);
 
+        $this->pathView = $view;
         $this->path = $viewFile;
     }
 
@@ -247,6 +255,14 @@ class View
      */
     public function isRouteActive() {
         return false == is_null($this->activeRoute);
+    }
+
+    /**
+     * Updates the view credentials related
+     * to the template
+     */
+    public function update() {
+        $this->setPath($this->pathView);
     }
 
     /**

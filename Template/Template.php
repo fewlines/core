@@ -209,6 +209,11 @@ class Template extends Renderer
         // Set layout
         $this->layout = new Layout($layout, $path);
 
+        // Update view if it was set
+        if ($this->view) {
+            $this->view->update();
+        }
+
         return $this;
     }
 
