@@ -263,6 +263,14 @@ class View
      */
     public function update() {
         $this->setPath($this->pathView);
+
+        if ($this->viewController) {
+            $this->viewController->update();
+        }
+
+        if ($this->routeController) {
+            $this->rounteController->update();
+        }
     }
 
     /**

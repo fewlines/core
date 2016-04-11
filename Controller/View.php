@@ -58,6 +58,14 @@ class View implements IView
 		}
 	}
 
+    /**
+     * Updates properties related to the template
+     */
+    public function update() {
+        $this->view = $this->template->getView();
+        $this->layout = $this->template->getLayout();
+    }
+
 	/**
 	 * Redirects
 	 *
