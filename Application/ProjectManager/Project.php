@@ -68,6 +68,11 @@ class Project
      */
     private $resourcePath;
 
+    /**
+     * @var string
+     */
+    private $templatePath;
+
 	/**
 	 * Holds the bootstrap instance of
 	 * from the given namespace - if exists
@@ -97,6 +102,7 @@ class Project
         $this->layoutPath = PathHelper::createPath(array($this->root, PROJECT_LAYOUT_PATH));
         $this->translationPath = PathHelper::createPath(array($this->root, PROJECT_TRANSLATION_PATH));
         $this->resourcePath = PathHelper::createPath(array($this->root, PROJECT_RESOURCE_PATH));
+        $this->templatePath = PathHelper::createPath(array($this->root, PROJECT_TEMPLATE_PATH));
 	}
 
     /**
@@ -232,6 +238,13 @@ class Project
      */
     public function getResourcePath() {
         return $this->resourcePath;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTemplatePath() {
+        return $this->templatePath;
     }
 
     /**
