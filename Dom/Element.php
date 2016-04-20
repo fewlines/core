@@ -221,6 +221,27 @@ class Element extends Element\Renderer
     }
 
     /**
+     * @param string $name
+     * @return boolean
+     */
+    public function hasAttribute($name) {
+        return array_key_exists($name, $this->attributes);
+    }
+
+    /**
+     * @param string $name
+     * @return boolean
+     */
+    public function removeAttribute($name) {
+        if (array_key_exists($name, $this->attributes)) {
+            unset($this->attributes[$name]);
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * @return array
      */
     public function getAttributes() {
