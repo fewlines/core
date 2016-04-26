@@ -70,6 +70,18 @@ class Element
     }
 
     /**
+     * Removes a child
+     */
+    public function removeChild(Element $child) {
+        foreach ($this->children as $i => $c) {
+            if ($c == $child) {
+                array_splice($this->children, $i, 1);
+                break;
+            }
+        }
+    }
+
+    /**
      * Adds the children
      *
      * @param array $children

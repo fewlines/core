@@ -124,7 +124,7 @@ class Project
             }
 
             Router::getInstance()->update();
-            Config::getInstance()->applyShortcuts();
+            Config::getInstance()->update();
         }
 
         return $this->bootstrap;

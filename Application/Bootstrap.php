@@ -279,5 +279,8 @@ class Bootstrap
                 }
             }
         }
+
+        $this->config->setEnvironment($environment);
+        $this->config->applyEnvironment();
     }
 }

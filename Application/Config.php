@@ -5,15 +5,21 @@ use Fewlines\Core\Helper\DirHelper;
 use Fewlines\Core\Helper\PathHelper;
 use Fewlines\Core\Helper\ArrayHelper;
 use Fewlines\Core\Helper\ShortcutHelper;
+use Fewlines\Core\Application\Environment;
 use Fewlines\Core\Xml\Tree\Element;
 use Fewlines\Core\Xml\Xml;
 
 class Config
 {
     /**
-     * @var
+     * @var string
      */
     const SHORTCUT_ATTR_IDENTIFIER = 'shortcuts';
+
+    /**
+     * @var string
+     */
+    const ENVIRONMENT_ATTR_IDENTIFIER = 'environment';
 
     /**
      * Holds the instance
@@ -45,6 +51,11 @@ class Config
     private $xmls = array();
 
     /**
+     * @var Environment
+     */
+    private $environment = null;
+
+    /**
      * @throws Exception\ConfigJustInstantiatedException
      */
     public function __construct() {
@@ -70,6 +81,13 @@ class Config
         }
 
         return self::$instance;
+    }
+
+    /**
+     * @param Environment $environment
+     */
+    public function setEnvironment(Environment $environment) {
+        $this->environment = $environment;
     }
 
     /**
@@ -139,6 +157,14 @@ class Config
     }
 
     /**
+     * Update contents
+     */
+    public function update() {
+        $this->applyShortcuts();
+        $this->applyEnvironment();
+    }
+
+    /**
      * This will check for replacement flag the user is able
      * to set. This will prevent a merging of the childs
      * from a subtree and remove the one which is marked
@@ -202,7 +228,7 @@ class Config
     }
 
     /**
-     * Apply's the executed shortcut string
+     * Applies the executed shortcut string
      * if the flag of the element tree is set
      */
     public function applyShortcuts() {
@@ -252,6 +278,53 @@ class Config
         if (ShortcutHelper::containsShortcut($child->getContent())) {
             $child->setContent(ShortcutHelper::parse($child->getContent()));
         }
+    }
+
+    /**
+     * Applies environment conditions etc.
+     */
+    public function applyEnvironment() {
+        if (!$this->environment) {
+            return;
+        }
+
+        foreach ($this->xmls as $i => &$xml) {
+            if($xml->getTreeElement()->hasAttribute(self::ENVIRONMENT_ATTR_IDENTIFIER)) {
+                $treeElement = $xml->getTreeElement();
+
+                foreach ($treeElement->getChildren() as &$child) {
+                    $this->applyChildrenEnvironment($child, $treeElement);
+                }
+            }
+        }
+    }
+
+    /**
+     * @param Element &$element
+     */
+    private function applyChildrenEnvironment(Element &$element, Element &$parent) {
+        if (!$this->environmentElementActive($element)) {
+            $parent->removeChild($element);
+        }
+        else {
+            foreach ($element->getChildren() as &$child) {
+                $this->applyChildrenEnvironment($child, $element);
+            }
+        }
+    }
+
+    /**
+     * @param Element &$element
+     */
+    private function environmentElementActive(&$element) {
+        if (strtolower($element->getName()) == 'ifenv') {
+            $flag = $element->getAttribute('flag');
+            $fnc = Environment::FLAG_FUNCTION_IDENTIFIER . ucfirst(trim($flag));
+
+            return $this->environment->$fnc();
+        }
+
+        return true;
     }
 
     /**
