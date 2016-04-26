@@ -392,7 +392,8 @@ class View
         $this->viewController = new $this->controllerClass;
 
         if (true == ($this->viewController instanceof \Fewlines\Core\Controller\View)) {
-            $this->viewController->init(Template::getInstance());
+            $template = Template::getInstance();
+            $this->viewController->init($template);
             return $this->callViewAction($this->getAction() . self::ACTION_POSTFIX);
         }
         else {
@@ -414,7 +415,8 @@ class View
         $this->routeController = new $this->controllerClass;
 
         if (true == ($this->routeController instanceof \Fewlines\Core\Controller\View)) {
-            $this->routeController->init(Template::getInstance());
+            $template = Template::getInstance();
+            $this->routeController->init($template);
             return $this->callRouteMethod($this->activeRoute->getToMethod(), $this->activeRoute->getVarsRecursive());
         }
         else {

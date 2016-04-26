@@ -307,7 +307,8 @@ class Router extends Router\Routes
 		$urlLayoutParts = ArrayHelper::clean($urlLayoutParts);
 
 		for ($i = 0; $i < count($urlLayoutParts); $i++) {
-			$urlLayoutParts[$i] = reset(explode(":", $urlLayoutParts[$i]));
+			$exploded = explode(":", $urlLayoutParts[$i]);
+			$urlLayoutParts[$i] = reset($exploded);
 		}
 
 		return $urlLayoutParts;
@@ -440,7 +441,8 @@ class Router extends Router\Routes
 
 		for ($i = 0; $i < count($urlLayout); $i++) {
 			if (true == preg_match('/' . $method . ':/', $urlLayout[$i])) {
-				$defaultMethod = end(explode(':', $urlLayout[$i]));
+				$exploded = explode(':', $urlLayout[$i]);
+				$defaultMethod = end($exploded);
 			}
 		}
 
@@ -473,7 +475,8 @@ class Router extends Router\Routes
 				 */
 
 				if (true == preg_match('/\?(.*)/', $parts[$i])) {
-					$parts[$i] = reset(explode('?', $parts[$i]));
+					$exploded = explode('?', $parts[$i]);
+					$parts[$i] = reset($exploded);
 				}
 
 				$realParts[] = $parts[$i];

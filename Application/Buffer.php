@@ -17,7 +17,9 @@ class Buffer
 	 */
 	public static function clear($force = false) {
 		if (true == $force) {
-			while ( ! empty(ob_get_contents())) {
+			$content = ob_get_contents();
+
+			while ( ! empty($content)) {
             	ob_end_clean();
         	}
 		}

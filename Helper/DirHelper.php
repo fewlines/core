@@ -17,6 +17,8 @@ class DirHelper
         $files = array();
 
         for ($i = 0; $i < count($elements); $i++) {
+            $nameParts = explode(".", $elements[$i]['name']);
+
             if ($elements[$i]['type'] == 'dir') {
                 $deepFiles = self::getFilesByType($elements[$i]['path'], $filetype, $recursive);
 
@@ -24,7 +26,7 @@ class DirHelper
                     $files[] = $deepFiles;
                 }
             }
-            else if (strtolower(end(explode(".", $elements[$i]['name']))) == $filetype) {
+            else if (strtolower(end($nameParts)) == $filetype) {
                 $files[] = $elements[$i];
             }
         }

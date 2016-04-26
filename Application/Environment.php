@@ -252,7 +252,8 @@ class Environment
 	 */
 	public function __call($name, $args) {
 		if (preg_match_all('/' . self::FLAG_FUNCTION_IDENTIFIER . '/', $name)) {
-			$flag = strtolower(end(explode(self::FLAG_FUNCTION_IDENTIFIER, $name)));
+			$exploded = explode(self::FLAG_FUNCTION_IDENTIFIER, $name);
+			$flag = strtolower(end($exploded));
 			$type = $this->getType();
 
 			if(false != $type) {

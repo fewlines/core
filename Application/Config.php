@@ -234,7 +234,7 @@ class Config
     public function applyShortcuts() {
         foreach ($this->xmls as $i => &$xml) {
             if ($xml->getTreeElement()->hasAttribute(self::SHORTCUT_ATTR_IDENTIFIER)) {
-                foreach ($xml->getTreeElement()->getChildren() as &$child) {
+                foreach ($xml->getTreeElement()->getChildren() as $child) {
                     $this->applyChildrenShortcuts($child);
                 }
             }
@@ -248,13 +248,13 @@ class Config
         $this->applyAttributeShortcuts($element);
         $this->applyContentShortcuts($element);
 
-        foreach ($element->getChildren() as &$child) {
+        foreach ($element->getChildren() as $child) {
             // Parse attributes & content
             $this->applyAttributeShortcuts($child);
             $this->applyContentShortcuts($child);
 
             // Parse childs of the element if exist
-            foreach ($child->getChildren() as &$child) {
+            foreach ($child->getChildren() as $child) {
                 $this->applyChildrenShortcuts($child);
             }
         }
@@ -292,7 +292,7 @@ class Config
             if($xml->getTreeElement()->hasAttribute(self::ENVIRONMENT_ATTR_IDENTIFIER)) {
                 $treeElement = $xml->getTreeElement();
 
-                foreach ($treeElement->getChildren() as &$child) {
+                foreach ($treeElement->getChildren() as $child) {
                     $this->applyChildrenEnvironment($child, $treeElement);
                 }
             }
@@ -307,7 +307,7 @@ class Config
             $parent->removeChild($element);
         }
         else {
-            foreach ($element->getChildren() as &$child) {
+            foreach ($element->getChildren() as $child) {
                 $this->applyChildrenEnvironment($child, $element);
             }
         }
